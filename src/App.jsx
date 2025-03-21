@@ -32,6 +32,7 @@ import TermsConditions from "./components/Policy/TermsConditions.jsx";
 import RefundPolicy from "./components/Policy/RefundPolicy.jsx";
 import ShippingPolicy from "./components/Policy/ShippingPolicy.jsx";
 import PaymentsPolicy from "./components/Policy/PaymentPolicy.jsx";
+import PrivacyPolicy from "./components/Policy/PrivacyPolicy.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -75,6 +76,7 @@ function AppContent() {
           <Route path="/cancellation-refund-policy" element={<RefundPolicy />} />
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
           <Route path="/payments-policy" element={<PaymentsPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </div>
       <Footer />
