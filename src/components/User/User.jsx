@@ -27,6 +27,7 @@ function User() {
           },
         });
         if (response.status === 200) {
+          console.log(response.data);
           setProfile(response.data);
         }
       } catch (error) {
@@ -48,7 +49,7 @@ function User() {
         <div className="mb-10">
           <h1 className="text-xl font-bold text-gray-800">Hello,</h1>
           <h2 className="text-2xl font-semibold text-blue-600">
-            {profile.firstName + " " + profile.lastName}
+            {profile.user.firstName + " " + profile.user.lastName}
           </h2>
         </div>
         <nav>

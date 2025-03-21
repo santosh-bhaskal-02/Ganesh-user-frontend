@@ -39,7 +39,7 @@ function PersonalInfo() {
               <input
                 type="text"
                 name="firstName"
-                value={formData.firstName}
+                value={formData.user.firstName}
                 onChange={handleChange}
                 disabled={!isEditing}
                 className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
@@ -52,7 +52,7 @@ function PersonalInfo() {
               <input
                 type="text"
                 name="lastName"
-                value={formData.lastName}
+                value={formData.user.lastName}
                 onChange={handleChange}
                 disabled={!isEditing}
                 className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
@@ -69,7 +69,7 @@ function PersonalInfo() {
                   type="radio"
                   name="gender"
                   value="Male"
-                  checked={formData.gender === "Male"}
+                  checked={formData.user.gender === "Male"}
                   onChange={handleChange}
                   disabled={!isEditing}
                   className="text-blue-600"
@@ -81,7 +81,7 @@ function PersonalInfo() {
                   type="radio"
                   name="gender"
                   value="Female"
-                  checked={formData.gender === "Female"}
+                  checked={formData.user.gender === "Female"}
                   onChange={handleChange}
                   disabled={!isEditing}
                   className="text-blue-600"
@@ -99,7 +99,7 @@ function PersonalInfo() {
             <input
               type="email"
               name="email"
-              value={formData.email}
+              value={formData.user.email}
               onChange={handleChange}
               disabled={!isEditing}
               className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"
@@ -114,7 +114,7 @@ function PersonalInfo() {
             <input
               type="text"
               name="phone"
-              value={formData.phone}
+              value={formData.user.phone}
               onChange={handleChange}
               disabled={!isEditing}
               className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-100"

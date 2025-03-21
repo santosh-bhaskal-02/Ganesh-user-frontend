@@ -99,8 +99,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
-                  Sitemap
+                <a href="/shipping-policy" className="hover:text-white">
+                  Shipping
                 </a>
               </li>
               <li>
@@ -125,11 +125,11 @@ const Footer = () => {
             <h2 className="text-gray-300 font-semibold mb-4">CONTACT</h2>
             <p className="flex items-center space-x-2 text-sm text-gray-400">
               <Phone size={18} className="text-gray-400" />
-              <span>+91 98765 43210</span>
+              <span>+91 8805419693</span>
             </p>
             <p className="flex items-center space-x-2 text-sm text-gray-400 mt-2">
               <Mail size={18} className="text-gray-400" />
-              <span>support@ganeshmuseum.com</span>
+              <span>santoshbhaskal2127@gmail.com</span>
             </p>
           </div>
         </div>

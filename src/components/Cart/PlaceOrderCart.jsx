@@ -4,10 +4,11 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 import CartItems from "./cartItems";
-
+import AlertBox from "../404ErrorPage/AlertBox";
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
 const PlaceOrderCart = () => {
+  const [alert, setAlert] = useState(null);
   const { pid } = useParams();
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);
@@ -65,8 +66,29 @@ const PlaceOrderCart = () => {
     return subtotal + shippingCharge + taxCharge;
   };
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleCheckout = async () => {
     try {
+      const isRazorpayLoaded = await loadRazorpay();
+      if (!isRazorpayLoaded) {
+        alert("Failed to load Razorpay. Please try again.");
+        return;
+      }
+
       const response = await axios.post(
         `${apiUrl}/api/products/orders/place_order_cart`,
         {
@@ -82,8 +104,43 @@ const PlaceOrderCart = () => {
       );
 
       if (response.status === 200) {
-        alert(response.data.message);
-        navigate(`/orders`);
+        const orderId = response.data.order.id;
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: response.data.razorpayOrder.amount,
+          currency: "INR",
+          name: "Idol Booking",
+          description: "Complete your purchase",
+          order_id: response.data.razorpayOrder.id,
+
+          handler: async function (response) {
+            console.log(response);
+            await axios.post(`${apiUrl}/api/products/orders/verify_payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: orderId,
+            });
+
+            setAlert({
+              type: "success",
+              title: "Successful!",
+              message: "Payment Successful! Order placed.",
+            });
+
+            navigate("/orders");
+          },
+
+          prefill: {
+            name: "Customer",
+            email: "customer@example.com",
+            contact: "9999999999",
+          },
+          theme: { color: "#F37254" },
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.open();
       }
     } catch (err) {
       console.error("Error placing order:", err);
@@ -92,6 +149,16 @@ const PlaceOrderCart = () => {
   ` `;
   return (
     <div className="bg-gray-50 min-h-screen p-8">
+      {alert && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
+          <AlertBox
+            type={alert.type}
+            title={alert.title}
+            message={alert.message}
+            onClick={() => setAlert(null)}
+          />
+        </div>
+      )}
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-semibold border-b pb-4 mb-6">Order Summary</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

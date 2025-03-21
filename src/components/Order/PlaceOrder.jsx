@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import AlertBox from "../404ErrorPage/AlertBox";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
+const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
 const PlaceOrder = () => {
+  const [alert, setAlert] = useState(null);
   const { pid } = useParams();
   const navigate = useNavigate();
 
@@ -13,7 +16,8 @@ const PlaceOrder = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [orderLoading, setOrderLoading] = useState(false); // State for button loading
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [order_id, setOrder_id] = useState(null);
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
@@ -40,10 +44,32 @@ const PlaceOrder = () => {
     fetchProduct();
   }, [pid]);
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const checkoutPayment = async (productId) => {
-    setOrderLoading(true); // Start loading
+    setOrderLoading(true);
 
     try {
+      const isRazorpayLoaded = await loadRazorpay();
+      if (!isRazorpayLoaded) {
+        alert("Failed to load Razorpay. Please try again.");
+        setOrderLoading(false);
+        return;
+      }
+
       const response = await axios.post(
         `${apiUrl}/api/products/orders/place_order`,
         {
@@ -58,15 +84,57 @@ const PlaceOrder = () => {
         }
       );
 
+      console.log(response);
+
       if (response.status === 200) {
-        alert("Payment Successful! Order placed.");
-        navigate(`/orders`);
+        const orderId = response.data.order.id;
+        const options = {
+          key: razorpayKey,
+          amount: response.data.razorpayOrder.amount,
+          currency: "INR",
+          name: "Idol Booking",
+          description: "Complete your purchase",
+          order_id: response.data.razorpayOrder.id,
+
+          handler: async function (response) {
+            console.log(response);
+            await axios.post(`${apiUrl}/api/products/orders/verify_payment`, {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: orderId,
+            });
+
+            setAlert({
+              type: "success",
+              title: "Successful!",
+              message: "Payment Successful! Order placed.",
+            });
+
+            navigate("/orders");
+          },
+
+          prefill: {
+            name:
+              response.data.user.address.firstName + response.data.user.address.lastName,
+            email: response.data.user.email,
+            contact: response.data.user.phone,
+          },
+          theme: { color: "#F37254" },
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.open();
       }
     } catch (err) {
       console.error("Error placing order:", err);
-      alert("Failed to place order. Please try again.");
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: "Failed to place order. Please try again.",
+      });
     } finally {
-      setOrderLoading(false); // Stop loading
+      setOrderLoading(false);
     }
   };
 
@@ -98,6 +166,16 @@ const PlaceOrder = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {alert && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
+          <AlertBox
+            type={alert.type}
+            title={alert.title}
+            message={alert.message}
+            onClick={() => setAlert(null)}
+          />
+        </div>
+      )}
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
 
@@ -158,9 +236,7 @@ const PlaceOrder = () => {
           }`}>
           {orderLoading ? (
             <div className="flex items-center justify-center">
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                viewBox="0 0 24 24">
+              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -176,7 +252,7 @@ const PlaceOrder = () => {
               Placing Order...
             </div>
           ) : (
-            "Confirm Order"
+            "Pay Now"
           )}
         </button>
 

@@ -32,7 +32,7 @@ const RefundPolicy = () => {
           <a
             href="mailto:seller+88f4aadca6514d668731be46f4d93636@instamojo.com"
             className="text-blue-600 hover:underline">
-            seller+88f4aadca6514d668731be46f4d93636@instamojo.com
+            santoshbhaskal2127@gmail.com
           </a>
         </p>
         <p className="text-gray-700 leading-relaxed mt-4">
