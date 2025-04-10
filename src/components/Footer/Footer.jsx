@@ -99,8 +99,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/shipping-policy" className="hover:text-white">
-                  Shipping
+                <a href="https://merchant.razorpay.com/policy/PtYFwEppw62Suu/shipping" className="hover:text-white">
+                  Shipping and Delivery Policy
                 </a>
               </li>
               <li>

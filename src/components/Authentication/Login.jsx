@@ -33,7 +33,7 @@ function Login() {
 
   function validate() {
     let emailError = "";
-    let passwordError = "";
+    let passwordError = "";    
 
     const emailRegex = /\S+@\S+\.\S+/;
 
@@ -66,6 +66,7 @@ function Login() {
         `${apiUrl}/api/users/login/authenticate`,
         loginData
       );
+      console.log({response})
 
       if (response.status === 200) {
         setAlert({

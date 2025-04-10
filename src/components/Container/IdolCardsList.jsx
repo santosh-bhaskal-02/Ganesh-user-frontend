@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo } from "react";
+import React, { useContext, useEffect, useState, useMemo, useCallback } from "react";
 import IdolCard from "./IdolCard";
 import { IdolContext } from "../ContextApi/IdolContext";
 import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
@@ -21,9 +21,10 @@ function IdolCardsList() {
       try {
         const response = await axios.get(`${apiUrl}/api/products/category/fetch`);
         if (response.status === 200) {
+          console.log("cat", response.data);
           setCategories(response.data);
           setSelectedCategories(
-            response.data.reduce((acc, cat) => ({ ...acc, [cat.id]: false }), {})
+            response.data.name.reduce((acc, cat) => ({ ...acc, [cat.id]: false }), {})
           );
         }
       } catch (error) {
@@ -35,13 +36,13 @@ function IdolCardsList() {
     fetchCategories();
   }, []);
 
-  const handleCategorySelect = (categoryId) => {
+  const handleCategorySelect = useCallback((categoryId) => {
     setSelectedCategories((prev) => ({
       ...prev,
       [categoryId]: !prev[categoryId],
     }));
-    setCurrentPage(1); // Reset to first page on filter change
-  };
+    setCurrentPage(1);
+  }, []);
 
   const handleResetCategories = () => {
     setSelectedCategories(
@@ -52,14 +53,13 @@ function IdolCardsList() {
 
   const filteredIdols = useMemo(() => {
     return idolList?.filter((idol) => {
-      const categoryMatch = Object.keys(selectedCategories).some(
-        (categoryId) =>
-          selectedCategories[categoryId] && Number(categoryId) === idol.category.id
+      const isCategorySelected = Object.entries(selectedCategories).some(
+        ([catId, isSelected]) => isSelected && String(catId) === String(idol.category?.id)
       );
-      const priceMatch = idol.price <= priceRange;
-      return (
-        (!Object.values(selectedCategories).some(Boolean) || categoryMatch) && priceMatch
-      );
+      const isPriceInRange = idol.price <= priceRange;
+      const noCategorySelected = !Object.values(selectedCategories).some(Boolean);
+
+      return (noCategorySelected || isCategorySelected) && isPriceInRange;
     });
   }, [idolList, selectedCategories, priceRange]);
 
@@ -71,7 +71,6 @@ function IdolCardsList() {
     });
   }, [filteredIdols, sortOrder]);
 
-  // Pagination Logic
   const totalPages = Math.ceil(sortedAndFilteredIdols.length / ITEMS_PER_PAGE);
   const idolsToShow = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -107,8 +106,10 @@ function IdolCardsList() {
                 {categories.map((cat) => (
                   <label
                     key={cat.id}
+                    htmlFor={`cat-${cat.id}`}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition hover:bg-gray-200">
                     <input
+                      id={`cat-${cat.id}`}
                       type="checkbox"
                       checked={selectedCategories[cat.id] || false}
                       onChange={() => handleCategorySelect(cat.id)}
@@ -129,7 +130,7 @@ function IdolCardsList() {
                 max="5000"
                 step="100"
                 value={priceRange}
-                onChange={(e) => setPriceRange(e.target.value)}
+                onChange={(e) => setPriceRange(Number(e.target.value))}
                 className="w-full cursor-pointer"
               />
               <div className="flex justify-between text-sm text-gray-600 mt-1">
@@ -152,25 +153,31 @@ function IdolCardsList() {
               </select>
             </div>
           </div>
+
           {/* Main content */}
-          <div className="flex flex-col min-h-screen">
-            {/* Main Content */}
+          <div className="flex flex-col min-h-screen flex-grow">
             <div className="flex-grow">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {idolsToShow.map((idol) => (
-                  <IdolCard
-                    key={idol._id}
-                    id={idol._id}
-                    title={idol.title}
-                    thumbnail={idol.thumbnail?.image_url}
-                    category={idol.category.name}
-                    price={idol.price}
-                  />
-                ))}
-              </div>
+              {idolsToShow.length === 0 ? (
+                <p className="text-center w-full py-10 text-gray-600">
+                  No idols found with selected filters.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                  {idolsToShow.map((idol) => (
+                    <IdolCard
+                      key={idol._id}
+                      id={idol._id}
+                      title={idol.title}
+                      thumbnail={idol.thumbnail?.image_url}
+                      category={idol.category.name}
+                      price={idol.price}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Pagination at the bottom */}
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center mt-auto py-4 bg-white shadow-lg">
                 <button
