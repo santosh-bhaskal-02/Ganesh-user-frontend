@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { IdolContext } from "../ContextApi/IdolContext";
 import IdolCard from "../Container/IdolCard";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules"; // removed Navigation
 
 function Home() {
   const { idolList } = useContext(IdolContext);
@@ -29,8 +29,7 @@ function Home() {
   return (
     <div>
       <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        navigation
+        modules={[Pagination, Autoplay]} // removed Navigation module
         pagination={{ clickable: true }}
         autoplay={{ delay: 4000, disableOnInteraction: false }}
         loop={true}
@@ -135,26 +134,6 @@ function Home() {
             href="#all-exhibits"
             className="mt-6 inline-block px-6 py-3 bg-orange-500 text-white rounded-lg">
             View All Exhibits
-          </Link>
-        </div>
-      </section>
-
-      <section className="py-20 bg-white" id="visit">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-semibold">Visitor Information</h2>
-          <p className="mt-4 text-gray-700">
-            Hours of Operation: Open daily from 10 AM to 6 PM
-          </p>
-          <p className="mt-2 text-gray-700">
-            Admission Fees: Adults: $10 | Children under 12: Free
-          </p>
-          <p className="mt-2 text-gray-700">
-            Location: 123 Ganesh Lane, City, State, ZIP
-          </p>
-          <Link
-            href="#plan-your-visit"
-            className="mt-6 inline-block px-6 py-3 bg-orange-500 text-white rounded-lg">
-            Plan Your Visit
           </Link>
         </div>
       </section>

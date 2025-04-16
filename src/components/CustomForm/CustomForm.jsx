@@ -2,62 +2,106 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
+import {
+  FilePlus2,
+  ImagePlus,
+  Loader2,
+  XCircle,
+  SendHorizonal,
+  Ruler,
+  Info,
+} from "lucide-react";
+import AlertBox from "../404ErrorPage/AlertBox";
 
-const apiUrl = "http://localhost:5000"; // Replace with your API base URL
+const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
 function CustomForm() {
   const navigate = useNavigate();
+  const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState({
     suggestion: "",
-    photo: null,
+    height: "",
+    specification: "",
+    image: null,
   });
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
 
   if (!userId || !authToken) {
-    navigate("/login"); // Redirect to login page
+    navigate("/login");
     return null;
   }
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setSuggestions((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const addSuggestion = async (event) => {
-    event.preventDefault();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSuggestions((prevState) => ({
+      ...prevState,
+      image: file,
+    }));
+  };
+
+  const addSuggestion = async (e) => {
+    e.preventDefault();
     setLoading(true);
 
     const formData = new FormData();
     formData.append("suggestion", suggestions.suggestion);
-    if (suggestions.photo) {
-      formData.append("photo", suggestions.photo);
+    formData.append("size", suggestions.height);
+    formData.append("otherSpecifications", suggestions.specification);
+    if (suggestions.image) {
+      formData.append("image", suggestions.image);
     }
 
     try {
       const response = await axios.post(
-        `${apiUrl}/api/users/signup/add_suggestion/${userId}`,
+        `${apiUrl}/api/products/add/custom_product/${userId}`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
             "Content-Type": "multipart/form-data",
           },
-          credentials: "include",
         }
       );
-      if (response.status === 200) {
-        alert("Suggestion Added Successfully");
+      if (response.status === 200 || response.status === 201) {
+        console.log(response.data.message);
+        setAlert({
+          type: "success",
+          title: "Successful!",
+          message: response.data.message,
+        });
+        setSuggestions({
+          suggestion: "",
+          height: "",
+          specification: "",
+          photo: null,
+        });
+        document.getElementById("image").value = null;
       } else {
-        alert(response.data.message);
+        setAlert({
+          type: "error",
+          title: "Oops!",
+          message: "Failed to submit suggestion. Try again!",
+        });
       }
     } catch (error) {
       console.error(error);
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: error.response?.data?.message || "Something went wrong. Try again!",
+      });
     } finally {
       setLoading(false);
     }
@@ -66,76 +110,136 @@ function CustomForm() {
   const handleCancel = () => {
     setSuggestions({
       suggestion: "",
+      height: "",
+      specification: "",
       photo: null,
     });
     document.getElementById("photo").value = null;
   };
 
   return (
-    <div className="bg-white px-4">
-      <div className="bg-white border border-gray-300 py-20">
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-            Add Suggestion
-          </h2>
-          <form className="space-y-6" onSubmit={addSuggestion}>
-            {/* Textarea for Suggestion */}
-            <div>
-              <label
-                htmlFor="suggestion"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Suggestion
-              </label>
-              <textarea
-                id="suggestion"
-                name="suggestion"
-                rows="5"
-                onChange={handleChange}
-                value={suggestions.suggestion}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your suggestion here..."
-              ></textarea>
-            </div>
-
-            {/* File Upload for Photo */}
-            <div>
-              <label
-                htmlFor="photo"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Photo (optional)
-              </label>
-              <input
-                type="file"
-                id="photo"
-                name="photo"
-                onChange={(e) =>
-                  setSuggestions((prev) => ({ ...prev, photo: e.target.files[0] }))
-                }
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex items-end justify-end space-x-5">
-              <button
-                type="reset"
-                onClick={handleCancel}
-                className="py-2 px-6 bg-gray-100 text-black rounded-md hover:bg-red-500 hover:text-white"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="py-2 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-700"
-              >
-                {loading ? "Saving..." : "Submit"}
-              </button>
-            </div>
-          </form>
+    <div className="bg-yellow-50 min-h-screen py-10 px-4 flex items-center justify-center">
+      {alert && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
+          <AlertBox
+            type={alert.type}
+            title={alert.title}
+            message={alert.message}
+            onClick={() => setAlert(null)}
+          />
         </div>
+      )}
+
+      {loading && <LoadingSpinner />}
+      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 space-y-6">
+        <h2 className="text-3xl font-bold text-yellow-600 flex items-center gap-2">
+          <FilePlus2 className="w-7 h-7 text-yellow-500" />
+          Add Suggestion
+        </h2>
+
+        <form className="space-y-6" onSubmit={addSuggestion}>
+          {/* Suggestion */}
+          <div>
+            <label
+              htmlFor="suggestion"
+              className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <FilePlus2 className="w-4 h-4 text-yellow-500" />
+              Suggestion
+            </label>
+            <textarea
+              id="suggestion"
+              name="suggestion"
+              rows="4"
+              required
+              value={suggestions.suggestion}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Write your suggestion here..."></textarea>
+          </div>
+
+          {/* Height */}
+          <div>
+            <label
+              htmlFor="height"
+              className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <Ruler className="w-4 h-4 text-yellow-500" />
+              Height (in cm or inches)
+            </label>
+            <input
+              type="number"
+              id="height"
+              name="height"
+              value={suggestions.height}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="e.g. 12 inches / 30 cm"
+            />
+          </div>
+
+          {/* Other Specifications */}
+          <div>
+            <label
+              htmlFor="specification"
+              className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <Info className="w-4 h-4 text-yellow-500" />
+              Other Specifications
+            </label>
+            <input
+              type="text"
+              id="specification"
+              name="specification"
+              value={suggestions.specification}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="e.g. color, material, special notes"
+            />
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label
+              htmlFor="photo"
+              className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+              <ImagePlus className="w-4 h-4 text-yellow-500" />
+              Photo (Optional)
+            </label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-4">
+            <button
+              type="reset"
+              onClick={handleCancel}
+              className="flex items-center gap-2 px-6 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-all">
+              <XCircle className="w-4 h-4" />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center gap-2 px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-all disabled:opacity-60">
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <SendHorizonal className="w-4 h-4" />
+                  Submit
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

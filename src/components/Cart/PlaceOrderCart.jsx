@@ -1,70 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
-import CartItems from "./cartItems";
 import AlertBox from "../404ErrorPage/AlertBox";
+import SkeletonPlaceOrder from "../Order/SkeletonPlaceOrder";
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
+import SignInErrorPage from "../404ErrorPage/SignInErrorPage";
+import {
+  ShoppingBag as ShoppingBagIcon,
+  LocalShipping as LocalShippingIcon,
+  ReceiptLong as ReceiptLongIcon,
+  CurrencyRupee as CurrencyRupeeIcon,
+  Paid as PaidIcon,
+  ArrowBack as ArrowBackIcon,
+} from "@mui/icons-material";
+import { motion } from "framer-motion";
+
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
+const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
 const PlaceOrderCart = () => {
   const [alert, setAlert] = useState(null);
-  const { pid } = useParams();
   const navigate = useNavigate();
-  const [cart, setCart] = useState(null);
 
-  const [idol, setIdol] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(false);
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
 
+  if (!userId || !authToken) {
+    console.error("User is not authenticated. Missing token or userId.");
+    return <SignInErrorPage />;
+  }
+
   useEffect(() => {
-    async function fetchCart() {
+    const fetchCart = async () => {
       try {
-        const response = await axios.get(
-          `${apiUrl}/api/products/cart/${userId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-            credentials: "include",
-          }
-        );
-        // console.log(response.data);
-        if (response.status === 200) {
-          setCart(response.data);
-          console.log(response.data);
-        }
-
-        //console.log("cart",cart.cartItems);
+        const response = await axios.get(`${apiUrl}/api/products/cart/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+        });
+        setCart(response.data);
       } catch (err) {
-        console.error(err.response.data);
+        setError(true);
+        console.error("Error fetching cart:", err);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
     fetchCart();
-  }, []);
-
-  if (!cart) {
-    return;
-  }
-
-  if (cart.cartItems.length === 0) {
-    return <h1>Cart Is Empty</h1>;
-  }
-
-  //const [shippingCharge, setShippingCharge] = useState(5.00);
-  //const [taxCharge, setTaxCharge] = useState(8.32);
-
-  const shippingCharge = 10.0;
-  const taxCharge = 5.0;
-
-  const calculateTotal = (subtotal) => {
-    return subtotal + shippingCharge + taxCharge;
-  };
+  }, [userId]);
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
@@ -81,11 +71,14 @@ const PlaceOrderCart = () => {
     });
   };
 
-  const handleCheckout = async () => {
+  const checkoutPayment = async () => {
+    setOrderLoading(true);
+
     try {
       const isRazorpayLoaded = await loadRazorpay();
       if (!isRazorpayLoaded) {
         alert("Failed to load Razorpay. Please try again.");
+        setOrderLoading(false);
         return;
       }
 
@@ -106,7 +99,7 @@ const PlaceOrderCart = () => {
       if (response.status === 200) {
         const orderId = response.data.order.id;
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          key: razorpayKey,
           amount: response.data.razorpayOrder.amount,
           currency: "INR",
           name: "Idol Booking",
@@ -114,7 +107,6 @@ const PlaceOrderCart = () => {
           order_id: response.data.razorpayOrder.id,
 
           handler: async function (response) {
-            console.log(response);
             await axios.post(`${apiUrl}/api/products/orders/verify_payment`, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -132,23 +124,51 @@ const PlaceOrderCart = () => {
           },
 
           prefill: {
-            name: "Customer",
-            email: "customer@example.com",
-            contact: "9999999999",
+            name:
+              response.data.user.address.firstName +
+              " " +
+              response.data.user.address.lastName,
+            email: response.data.user.email,
+            contact: response.data.user.phone,
           },
-          theme: { color: "#F37254" },
+          theme: { color: "#FBBF24" },
         };
 
         const razorpay = new window.Razorpay(options);
         razorpay.open();
       }
     } catch (err) {
-      console.error("Error placing order:", err);
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: "Failed to place order. Please try again.",
+      });
+      setOrderLoading(false);
     }
   };
-  ` `;
+
+  const shipping = 5.0;
+  const taxes = 5.52;
+  const total = cart ? cart.totalPrice + shipping + taxes : 0;
+
+  if (orderLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error || !cart) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <SkeletonPlaceOrder />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gray-50 min-h-screen p-8">
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-white py-10 px-4 md:px-6"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}>
       {alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
           <AlertBox
@@ -159,59 +179,111 @@ const PlaceOrderCart = () => {
           />
         </div>
       )}
-      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-semibold border-b pb-4 mb-6">Order Summary</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 rounded-lg ">
-            {cart.cartItems.map((item) => (
-              <CartItems
-                key={item._id}
-                id={item._id}
-                title={item.product.title}
-                thumbnail={item.product.thumbnail.image_url}
-                price={item.product.price}
-                quantity={item.quantity}
-              />
-            ))}
+
+      {/* Step Progress Bar */}
+      <div className="flex justify-center gap-4 mb-8">
+        {["Cart", "Shipping", "Payment"].map((step, index) => (
+          <div
+            key={step}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600">
+            <div
+              className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                index < 2 ? "bg-yellow-400 text-black" : "bg-gray-300 text-white"
+              }`}>
+              {index + 1}
+            </div>
+            {step}
+            {index < 2 && <div className="w-6 h-0.5 bg-gray-300 mx-2" />}
+          </div>
+        ))}
+      </div>
+
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-8 p-8">
+          {/* Cart Items */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Review Your Cart</h2>
+            <div className="space-y-4">
+              {cart.cartItems.map((item) => (
+                <div key={item._id} className="flex gap-4 items-center">
+                  <img
+                    src={item.product.thumbnail.image_url}
+                    alt={item.product.title}
+                    className="w-32 h-32 object-cover rounded-xl shadow-md"
+                  />
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-700">
+                      {item.product.title}
+                    </h3>
+                    <p className="text-gray-600">Price: ₹{item.product.price}</p>
+                    <div className="mt-3">
+                      <span className="text-sm font-medium text-gray-600">
+                        Quantity: {item.quantity}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
-            <div className="flex justify-between py-2 text-gray-700">
-              <p>Subtotal</p>
-              <p>₹{cart.totalPrice}</p>
-            </div>
-            <div className="flex justify-between py-2 text-gray-700">
-              <p>
-                Shipping estimate
-                <span className="ml-1 text-gray-400 cursor-pointer" title="Flat rate">
-                  ?
+          {/* Order Summary */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Order Summary</h2>
+            <div className="space-y-4">
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <ShoppingBagIcon fontSize="small" /> Subtotal
                 </span>
-              </p>
-              <p>₹{shippingCharge.toFixed(2)}</p>
-            </div>
-            <div className="flex justify-between py-2 text-gray-700">
-              <p>
-                Tax estimate
-                <span className="ml-1 text-gray-400 cursor-pointer" title="8.4%">
-                  ?
+                <span>₹{cart.totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <LocalShippingIcon fontSize="small" /> Shipping
                 </span>
-              </p>
-              <p>₹{taxCharge.toFixed(2)}</p>
+                <span>₹{shipping.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <ReceiptLongIcon fontSize="small" /> Taxes
+                </span>
+                <span>₹{taxes.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
+                <span className="flex items-center gap-2">
+                  <CurrencyRupeeIcon fontSize="small" /> Total
+                </span>
+                <span>₹{total.toFixed(2)}</span>
+              </div>
             </div>
-            <div className="flex justify-between py-2 font-bold text-gray-900">
-              <p>Order Total</p>
-              <p>₹ {calculateTotal(cart.totalPrice)}</p>
+
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={checkoutPayment}
+                disabled={orderLoading}
+                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-lg font-medium transition duration-300 ${
+                  orderLoading
+                    ? "bg-yellow-300 text-yellow-800 cursor-not-allowed"
+                    : "bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg"
+                }`}>
+                <PaidIcon fontSize="small" />
+                {orderLoading ? "Placing Order..." : "Pay Now"}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                onClick={() => navigate(-1)}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-base font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition">
+                <ArrowBackIcon fontSize="small" />
+                Go Back
+              </motion.button>
             </div>
-            <button
-              onClick={handleCheckout}
-              className="w-full bg-indigo-600 text-white py-2 rounded-md mt-4 hover:bg-indigo-700">
-              Place Order
-            </button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

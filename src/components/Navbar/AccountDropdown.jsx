@@ -2,12 +2,9 @@ import React, { useContext } from "react";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../ContextApi/AuthContext";
-//import "./Dropdown.css";
-//import "./heading.css";
 import { FaUserCircle } from "react-icons/fa";
 import { IoMdLogOut } from "react-icons/io";
 import { BsBoxSeam } from "react-icons/bs";
-import { MdPersonAdd } from "react-icons/md";
 
 function AccountDropdown() {
   const { setSignIn } = useContext(AuthContext);
@@ -23,32 +20,33 @@ function AccountDropdown() {
   };
 
   return (
-    <div className="absolute right-0 mt-3 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-fade-in">
-      <ul className="py-2">
+    <div className="absolute right-0 mt-4 w-60 rounded-xl shadow-xl border border-white/20 bg-white/80 backdrop-blur-md z-50 animate-fade-in">
+      <ul className="divide-y divide-gray-200">
         <li>
           <Link
             to="/profile"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition duration-200">
+            className="flex items-center gap-3 px-5 py-4 text-gray-700 hover:bg-blue-50 transition-all duration-200 font-medium rounded-t-xl"
+          >
             <FaUserCircle size={20} className="text-blue-600" />
-            Profile
+            My Profile
           </Link>
         </li>
         <li>
           <Link
             to="/orders"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition duration-200">
+            className="flex items-center gap-3 px-5 py-4 text-gray-700 hover:bg-green-50 transition-all duration-200 font-medium"
+          >
             <BsBoxSeam size={20} className="text-green-600" />
-            Orders
+            My Orders
           </Link>
         </li>
         <li>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-100 transition duration-200">
+            className="w-full flex items-center gap-3 px-5 py-4 text-red-600 hover:bg-red-50 transition-all duration-200 font-medium rounded-b-xl"
+          >
             <IoMdLogOut size={20} />
-            Log Out
+            Logout
           </button>
         </li>
       </ul>

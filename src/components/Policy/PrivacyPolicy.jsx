@@ -1,105 +1,134 @@
 import React from "react";
+import {
+  Lock,
+  User,
+  Mail,
+  ShieldCheck,
+  Globe,
+  Cookie,
+  CreditCard,
+  Database,
+  RefreshCcw,
+  MessageCircle,
+} from "lucide-react";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 bg-gray-100 text-gray-800 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center mb-6">Privacy Policy</h1>
-      <p className="text-center text-gray-600">
-        <strong>Effective Date:</strong> {new Date().toLocaleDateString()}
-      </p>
+    <div className="bg-yellow-50 min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="max-w-4xl bg-white shadow-2xl rounded-2xl p-8 sm:p-12">
+        <h1 className="text-4xl font-bold text-yellow-600 text-center mb-2 flex items-center justify-center gap-2">
+          <ShieldCheck className="w-8 h-8 text-yellow-500" />
+          Privacy Policy
+        </h1>
+        <p className="text-center text-sm text-gray-500 mb-6">
+          <strong>Effective Date:</strong> {new Date().toLocaleDateString()}
+        </p>
 
-      <p className="mt-4">
-        Welcome to{" "}
-        <strong>
-          <a
-            href="https://ganesh-museum.onrender.com"
-            className="text-blue-600 hover:underline">
-            ganesh-museum.onrender.com
-          </a>
-        </strong>
-        . We are committed to protecting your privacy and ensuring your personal
-        information is handled securely and responsibly.
-      </p>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <User className="w-5 h-5 text-yellow-500" />Information We Collect
+          </h2>
+          <ul className="list-disc pl-6 mt-2 text-gray-700">
+            <li>Name, Email, Phone Number</li>
+            <li>Payment Details (Processed securely via Razorpay)</li>
+            <li>Browser, Device Info, IP Address, Cookies</li>
+          </ul>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">1. Information We Collect</h2>
-      <h3 className="text-lg font-semibold mt-4">a) Personal Information</h3>
-      <ul className="list-disc pl-6">
-        <li>Name</li>
-        <li>Email address</li>
-        <li>Phone number</li>
-        <li>Payment details (processed securely via Razorpay)</li>
-      </ul>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <Globe className="w-5 h-5 text-yellow-500" />How We Use Your Information
+          </h2>
+          <ul className="list-disc pl-6 mt-2 text-gray-700">
+            <li>Process bookings and payments</li>
+            <li>Improve our website and services</li>
+            <li>Send updates (you can opt-out anytime)</li>
+          </ul>
+        </section>
 
-      <h3 className="text-lg font-semibold mt-4">b) Non-Personal Information</h3>
-      <ul className="list-disc pl-6">
-        <li>Browser type and version</li>
-        <li>Device type</li>
-        <li>IP address</li>
-        <li>Cookies and usage data</li>
-      </ul>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-yellow-500" />Payment Security
+          </h2>
+          <p className="text-gray-700 mt-2">
+            All payments are securely processed via <strong>Razorpay</strong>. We do not store any sensitive card or UPI info.
+          </p>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">2. How We Use Your Information</h2>
-      <ul className="list-disc pl-6">
-        <li>Process bookings and payments</li>
-        <li>Improve our website and services</li>
-        <li>Provide customer support</li>
-        <li>Send updates and promotional offers (you can opt out anytime)</li>
-      </ul>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <Cookie className="w-5 h-5 text-yellow-500" />Cookies and Tracking
+          </h2>
+          <ul className="list-disc pl-6 mt-2 text-gray-700">
+            <li>Used to remember preferences and improve UX</li>
+            <li>You can disable cookies anytime in your browser</li>
+          </ul>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">3. Payment Security</h2>
-      <p>
-        We use <strong>Razorpay</strong> to process payments securely. We do not store
-        your payment details on our servers.
-      </p>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <Database className="w-5 h-5 text-yellow-500" />Data Sharing
+          </h2>
+          <p className="text-gray-700 mt-2">
+            We <strong>never</strong> sell or rent your data. Limited info is shared only with:
+          </p>
+          <ul className="list-disc pl-6 mt-2 text-gray-700">
+            <li>Trusted services (e.g. Razorpay)</li>
+            <li>Legal authorities (if required by law)</li>
+          </ul>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">4. Cookies and Tracking</h2>
-      <ul className="list-disc pl-6">
-        <li>Remember user preferences</li>
-        <li>Analyze site traffic and performance</li>
-      </ul>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <Lock className="w-5 h-5 text-yellow-500" />Data Security
+          </h2>
+          <p className="text-gray-700 mt-2">
+            We take reasonable precautions to protect your data, but no system is 100% secure.
+          </p>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">5. Sharing of Information</h2>
-      <p>
-        We do <strong>not</strong> sell or rent your personal information. However, we may
-        share data with:
-      </p>
-      <ul className="list-disc pl-6">
-        <li>Payment processors (e.g., Razorpay)</li>
-        <li>Law enforcement if required by law</li>
-      </ul>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <RefreshCcw className="w-5 h-5 text-yellow-500" />Your Rights
+          </h2>
+          <ul className="list-disc pl-6 mt-2 text-gray-700">
+            <li>Request data updates or deletion</li>
+            <li>Unsubscribe from communication</li>
+            <li>Control cookie preferences</li>
+          </ul>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">6. Data Security</h2>
-      <p>
-        We take necessary precautions to protect your data, but no system is 100% secure.
-      </p>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <RefreshCcw className="w-5 h-5 text-yellow-500" />Policy Changes
+          </h2>
+          <p className="text-gray-700 mt-2">
+            We may revise this policy at any time. Changes will be posted here.
+          </p>
+        </section>
 
-      <h2 className="text-2xl font-semibold mt-6">7. Your Rights</h2>
-      <ul className="list-disc pl-6">
-        <li>Access, update, or delete your personal data</li>
-        <li>Opt out of promotional emails</li>
-        <li>Disable cookies in your browser</li>
-      </ul>
-
-      <h2 className="text-2xl font-semibold mt-6">8. Changes to This Policy</h2>
-      <p>We may update this Privacy Policy from time to time.</p>
-
-      <h2 className="text-2xl font-semibold mt-6">9. Contact Us</h2>
-      <p>
-        <strong>Email:</strong>{" "}
-        <a
-          href="mailto:santoshbhaskal2127@gmail.com"
-          className="text-blue-600 hover:underline">
-          santoshbhaskal2127@gmail.com
-        </a>
-      </p>
-      <p>
-        <strong>Website:</strong>{" "}
-        <a
-          href="https://ganesh-museum.onrender.com"
-          className="text-blue-600 hover:underline">
-          ganesh-museum.onrender.com
-        </a>
-      </p>
+        <section className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-yellow-500" />Contact Us
+          </h2>
+          <p className="text-gray-700 mt-2">
+            Email:{" "}
+            <a
+              href="mailto:santoshbhaskal2127@gmail.com"
+              className="text-blue-600 hover:underline">
+              santoshbhaskal2127@gmail.com
+            </a>
+          </p>
+          <p className="text-gray-700">
+            Website:{" "}
+            <a
+              href="https://ganesh-museum.onrender.com"
+              className="text-blue-600 hover:underline">
+              ganesh-museum.onrender.com
+            </a>
+          </p>
+        </section>
+      </div>
     </div>
   );
 };

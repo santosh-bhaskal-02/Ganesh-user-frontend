@@ -1,8 +1,9 @@
-import React, { useState } from "react";
 import axios from "axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Key } from "lucide-react";
+import { Mail, Lock, Key, Eye, EyeOff } from "lucide-react";
 import AlertBox from "../404ErrorPage/AlertBox";
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -17,8 +18,9 @@ function ForgotPassword() {
     password: "",
     confirmPassword: "",
   });
-
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -27,27 +29,19 @@ function ForgotPassword() {
 
   const validate = () => {
     let newErrors = {};
-    switch (step) {
-      case 1:
-        if (!signUpData.email.match(/\S+@\S+\.\S+/)) {
-          newErrors.email = "Please enter a valid email address.";
-        }
-        break;
-      case 2:
-        if (!signUpData.otp) {
-          newErrors.otp = "OTP is required.";
-        }
-        break;
-      case 3:
-        if (!signUpData.password || signUpData.password.length < 6) {
-          newErrors.password = "Password must be at least 6 characters long.";
-        }
-        if (signUpData.password !== signUpData.confirmPassword) {
-          newErrors.confirmPassword = "Passwords do not match.";
-        }
-        break;
-      default:
-        break;
+    if (step === 1 && !signUpData.email.match(/\S+@\S+\.\S+/)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+    if (step === 2 && !signUpData.otp) {
+      newErrors.otp = "OTP is required.";
+    }
+    if (step === 3) {
+      if (!signUpData.password || signUpData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters.";
+      }
+      if (signUpData.password !== signUpData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match.";
+      }
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -61,43 +55,30 @@ function ForgotPassword() {
     try {
       switch (step) {
         case 1:
-          const response_email = await axios.post(`${apiUrl}/api/users/login/send_otp`, {
+          const res1 = await axios.post(`${apiUrl}/api/users/login/send_otp`, {
             email: signUpData.email,
           });
-          setAlert({
-            type: "success",
-            title: "Successful!",
-            message: response_email.data.message,
-          });
-
+          setAlert({ type: "success", title: "Success", message: res1.data.message });
           setStep(2);
           break;
         case 2:
-          const response_OTP = await axios.post(`${apiUrl}/api/users/login/verify_otp`, {
+          const res2 = await axios.post(`${apiUrl}/api/users/login/verify_otp`, {
             email: signUpData.email,
             otp: signUpData.otp,
           });
-          setAlert({
-            type: "success",
-            title: "Successful!",
-            message: response_OTP.data.message,
-          });
+          setAlert({ type: "success", title: "Success", message: res2.data.message });
           setStep(3);
           break;
         case 3:
-          const response_resetPassword = await axios.put(
-            `${apiUrl}/api/users/login/resetPassword`,
-            {
-              email: signUpData.email,
-              password: signUpData.password,
-            }
-          );
+          const res3 = await axios.put(`${apiUrl}/api/users/login/resetPassword`, {
+            email: signUpData.email,
+            password: signUpData.password,
+          });
           setAlert({
             type: "success",
-            title: "Successful!",
-            message: response_resetPassword.data.message,
+            title: "Password Updated",
+            message: res3.data.message,
           });
-          // alert("Password updated successfully!");
           navigate("/login");
           break;
         default:
@@ -107,19 +88,17 @@ function ForgotPassword() {
       setAlert({
         type: "error",
         title: "Oops!",
-        message: err.response?.data?.message || "Something went wrong. Please try again.",
+        message: err.response?.data?.message || "Something went wrong.",
       });
-      // alert(err.response?.data?.message || "Something went wrong. Please try again.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-indigo-600">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-50 via-white to-blue-100 px-4">
       {alert && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <AlertBox
             type={alert.type}
             title={alert.title}
@@ -128,125 +107,137 @@ function ForgotPassword() {
           />
         </div>
       )}
-      <div className="w-full max-w-md p-8 bg-white shadow-xl rounded-lg">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-blue-200 animate-fade-in">
+        {loading && <LoadingSpinner />}
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6 tracking-tight">
           {step === 1 && "Forgot Password"}
           {step === 2 && "Verify OTP"}
           {step === 3 && "Reset Password"}
         </h2>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {(() => {
-            switch (step) {
-              case 1:
-                return (
-                  <div className="relative">
-                    <Mail
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      size={20}
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      value={signUpData.email}
-                      onChange={handleChange}
-                      placeholder="Enter Email Address"
-                      className="w-full pl-12 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-                      required
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {step === 1 && (
+            <div>
+              <div className="relative">
+                <Mail
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400"
+                  size={20}
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={signUpData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="w-full pl-12 py-3 rounded-xl bg-blue-50 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+              )}
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <div className="relative">
+                <Key
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400"
+                  size={20}
+                />
+                <input
+                  type="text"
+                  name="otp"
+                  value={signUpData.otp}
+                  onChange={handleChange}
+                  placeholder="Enter OTP"
+                  className="w-full pl-12 py-3 rounded-xl bg-blue-50 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              {errors.otp && <p className="text-sm text-red-500 mt-1">{errors.otp}</p>}
+            </div>
+          )}
+
+          {step === 3 && (
+            <>
+              <div>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400"
+                    size={20}
+                  />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={signUpData.password}
+                    onChange={handleChange}
+                    placeholder="New Password"
+                    className="w-full pl-12 py-3 rounded-xl bg-blue-50 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <div
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? (
+                      <EyeOff size={20} className="text-blue-400" />
+                    ) : (
+                      <Eye size={20} className="text-blue-400" />
                     )}
                   </div>
-                );
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+                )}
+              </div>
 
-              case 2:
-                return (
-                  <div className="relative">
-                    <Key
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                      size={20}
-                    />
-                    <input
-                      type="text"
-                      name="otp"
-                      value={signUpData.otp}
-                      onChange={handleChange}
-                      placeholder="Enter OTP"
-                      className="w-full pl-12 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-                      required
-                    />
-                    {errors.otp && (
-                      <p className="text-red-500 text-sm mt-1">{errors.otp}</p>
+              <div>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400"
+                    size={20}
+                  />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={signUpData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm Password"
+                    className="w-full pl-12 py-3 rounded-xl bg-blue-50 border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <div
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} className="text-blue-400" />
+                    ) : (
+                      <Eye size={20} className="text-blue-400" />
                     )}
                   </div>
-                );
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
+                )}
+              </div>
+            </>
+          )}
 
-              case 3:
-                return (
-                  <>
-                    <div className="relative">
-                      <Lock
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                        size={20}
-                      />
-                      <input
-                        type="password"
-                        name="password"
-                        value={signUpData.password}
-                        onChange={handleChange}
-                        placeholder="Enter New Password"
-                        className="w-full pl-12 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-                        required
-                      />
-                      {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                      )}
-                    </div>
-
-                    <div className="relative">
-                      <Lock
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-                        size={20}
-                      />
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        value={signUpData.confirmPassword}
-                        onChange={handleChange}
-                        placeholder="Confirm New Password"
-                        className="w-full pl-12 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-                        required
-                      />
-                      {errors.confirmPassword && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.confirmPassword}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                );
-
-              default:
-                return null;
-            }
-          })()}
-
-          <div className="flex justify-between items-center mt-6">
+          <div className="flex flex-col items-center gap-4 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full ${
+                step > 1 ? "w-full" : ""
+              } bg-blue-400 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-300`}>
+              {loading ? "Processing..." : step === 3 ? "Update" : "Next"}
+            </button>
             {step > 1 && (
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="w-1/3 bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-all shadow-md">
+                className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2.5 rounded-xl transition">
                 Back
               </button>
             )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-1/3 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-lg transition-all shadow-md">
-              {loading ? "Processing..." : step === 3 ? "Update" : "Next"}
-            </button>
           </div>
         </form>
       </div>

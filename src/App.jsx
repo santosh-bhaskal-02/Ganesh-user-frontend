@@ -14,7 +14,7 @@ import Cart from "./components/Cart/Cart.jsx";
 import Order from "./components/Order/Order.jsx";
 import Idoldetails from "./components/Productfeature/Idoldetails.jsx";
 import Footer from "./components/Footer/Footer.jsx";
-//import Sidebar from "./components/Navbar/Sidebar.jsx";
+
 import "./index.css";
 //import UserProfile from "./components/User/UserProfile.jsx";
 import AddAddress from "./components/Address/AddAddress.jsx";
@@ -33,6 +33,9 @@ import RefundPolicy from "./components/Policy/RefundPolicy.jsx";
 import ShippingPolicy from "./components/Policy/ShippingPolicy.jsx";
 import PaymentsPolicy from "./components/Policy/PaymentPolicy.jsx";
 import PrivacyPolicy from "./components/Policy/PrivacyPolicy.jsx";
+import OrderDetails from "./components/Order/OrderDetails.jsx";
+
+import ErrorPage from "./components/404ErrorPage/ErrorPage.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -54,6 +57,7 @@ function AppContent() {
           <Route path="/forgot_password" element={<ForgotPassword />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<Order />} />
+          <Route path="/order-details/:orderId" element={<OrderDetails />} />
 
           <Route path="/profile/*" element={<User />}>
             <Route path="" element={<PersonelInfo />} />
@@ -69,7 +73,6 @@ function AppContent() {
           <Route path="/place_order/:pid" element={<PlaceOrder />} />
           <Route path="/place_order_cart" element={<PlaceOrderCart />} />
 
-          <Route path="/custom" element={<CustomForm />} />
           <Route path="/about_us" element={<AboutUs />} />
           <Route path="/contact_us" element={<ContactUs />} />
           <Route path="/terms-and-conditions" element={<TermsConditions />} />
@@ -77,6 +80,9 @@ function AppContent() {
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
           <Route path="/payments-policy" element={<PaymentsPolicy />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+          <Route path="*" element={<ErrorPage />} />
+          <Route path="/custom_form" element={<CustomForm />} />
         </Routes>
       </div>
       <Footer />

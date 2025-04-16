@@ -99,12 +99,12 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="https://merchant.razorpay.com/policy/PtYFwEppw62Suu/shipping" className="hover:text-white">
+                <a href="/shipping-policy" className="hover:text-white">
                   Shipping and Delivery Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <a href="/contact_us" className="hover:text-white">
                   Grievance Redressal
                 </a>
               </li>
@@ -138,10 +138,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between text-gray-400 text-sm pt-6">
           {/* Left Links */}
           <div className="flex space-x-6">
-            <a href="#" className="flex items-center space-x-2 hover:text-white">
-              <Store size={18} className="text-gray-400" />
-              <span>Become a Seller</span>
-            </a>
+           
 
             <a
               href="/terms-and-conditions"

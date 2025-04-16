@@ -1,9 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Mail, User, Smartphone, Lock, Key } from "lucide-react";
+import {
+  Mail,
+  User,
+  Smartphone,
+  Lock,
+  Key,
+  CheckCircle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import AlertBox from "../404ErrorPage/AlertBox";
-
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
 function Signup() {
@@ -14,7 +23,8 @@ function Signup() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState({});
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signUpData, setSignUpData] = useState({
     email: "",
     otp: "",
@@ -30,10 +40,19 @@ function Signup() {
     setSignUpData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () =>
+    setShowConfirmPassword(!showConfirmPassword);
+
+  const validateEmail = (email) => {
+    const emailRegex = /\S+@\S+\.\S+/;
+    return emailRegex.test(email);
+  };
+
   const sendOtp = async (event) => {
     event.preventDefault();
-    if (!signUpData.email || !/\S+@\S+\.\S+/.test(signUpData.email)) {
-      setErrors({ email: "Enter a valid email." });
+    if (!signUpData.email || !validateEmail(signUpData.email)) {
+      setErrors({ email: "Please enter a valid email." });
       return;
     }
     setLoading(true);
@@ -45,10 +64,9 @@ function Signup() {
         setOtpSent(true);
         setAlert({
           type: "success",
-          title: "Successful!",
+          title: "OTP Sent Successfully!",
           message: response.data.message,
         });
-        // alert("OTP sent to your email.");
       }
     } catch (err) {
       setAlert({
@@ -56,7 +74,6 @@ function Signup() {
         title: "Oops!",
         message: err.response?.data.message || "Failed to send OTP.",
       });
-      //alert(err.response?.data.message || "Failed to send OTP.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +82,7 @@ function Signup() {
   const verifyOtp = async (event) => {
     event.preventDefault();
     if (!otp) {
-      setErrors({ otp: "Enter OTP." });
+      setErrors({ otp: "Please enter OTP." });
       return;
     }
     setLoading(true);
@@ -78,18 +95,16 @@ function Signup() {
         setStep(2);
         setAlert({
           type: "success",
-          title: "Successful!",
+          title: "OTP Verified!",
           message: response.data.message,
         });
-        // alert("OTP verified. Proceed with signup.");
       }
     } catch (err) {
       setAlert({
         type: "error",
-        title: "Oops!",
+        title: "Invalid OTP!",
         message: err.response?.data.message || "Invalid OTP.",
       });
-      // alert(err.response?.data.message || "Invalid OTP.");
     } finally {
       setLoading(false);
     }
@@ -124,35 +139,52 @@ function Signup() {
     setStep(step + 1);
   };
 
+  const prevStep = () => {
+    setStep(step - 1);
+  };
+
   const signup = async (event) => {
     event.preventDefault();
+    setErrors({});
+    let newErrors = {};
+
+    if (!signUpData.password || signUpData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+    if (signUpData.password !== signUpData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     setLoading(true);
     try {
       const response = await axios.post(`${apiUrl}/api/users/signup`, signUpData);
       if (response.status === 201) {
         setAlert({
           type: "success",
-          title: "Successful!",
+          title: "Sign Up Successful!",
           message: response.data.message,
         });
 
-        // alert(response.data.message);
         navigate("/login");
       }
     } catch (err) {
       setAlert({
         type: "error",
-        title: "Oops!",
+        title: "Sign Up Failed!",
         message: err.response?.data.message || "Signup failed.",
       });
-      //  alert(err.response?.data.message || "Signup failed.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200">
+      {loading && <LoadingSpinner />}
       {alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
           <AlertBox
@@ -163,21 +195,32 @@ function Signup() {
           />
         </div>
       )}
-      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          {step === 1
-            ? "Verify Email"
-            : step === 2
-            ? "Enter Name"
-            : step === 3
-            ? "Enter Mobile Number"
-            : step === 4
-            ? "Set Password"
-            : "Sign Up"}
+      <div className="w-full max-w-lg p-8 bg-white shadow-xl rounded-lg transition-all duration-300">
+        {/* Title */}
+        <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">
+          <CheckCircle className="inline-block text-blue-600" size={40} /> Sign Up
         </h2>
 
+        {/* Description */}
+        <p className="text-center text-lg text-gray-600 mb-8">
+          Create an account to enjoy exclusive access to our platform. Let's get started!
+        </p>
+
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex space-x-2">
+            {[1, 2, 3, 4].map((stepNum) => (
+              <div
+                key={stepNum}
+                className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                  step >= stepNum ? "bg-blue-600" : "bg-gray-400"
+                }`}></div>
+            ))}
+          </div>
+          <span className="text-sm text-gray-500">{step} / 4</span>
+        </div>
+
         <form
-          className="space-y-5"
+          className="space-y-6"
           onSubmit={
             step === 1 ? (otpSent ? verifyOtp : sendOtp) : step === 4 ? signup : nextStep
           }>
@@ -186,7 +229,7 @@ function Signup() {
             <>
               <div className="relative">
                 <Mail
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                   size={20}
                 />
                 <input
@@ -195,17 +238,17 @@ function Signup() {
                   placeholder="Email Address"
                   value={signUpData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full pl-12 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-300"
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
               </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+              )}
 
               {otpSent && (
-                <div className="relative">
+                <div className="relative mt-4">
                   <Key
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                     size={20}
                   />
                   <input
@@ -214,11 +257,8 @@ function Signup() {
                     placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="w-full pl-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    className="w-full pl-12 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-300"
                   />
-                  {errors.otp && (
-                    <p className="text-red-500 text-sm mt-1">{errors.otp}</p>
-                  )}
                 </div>
               )}
             </>
@@ -229,7 +269,7 @@ function Signup() {
             ["firstName", "lastName"].map((field) => (
               <div key={field} className="relative">
                 <User
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                   size={20}
                 />
                 <input
@@ -238,7 +278,7 @@ function Signup() {
                   placeholder={field === "firstName" ? "First Name" : "Last Name"}
                   value={signUpData[field]}
                   onChange={handleChange}
-                  className="w-full pl-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full pl-12 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-300"
                 />
               </div>
             ))}
@@ -247,7 +287,7 @@ function Signup() {
           {step === 3 && (
             <div className="relative">
               <Smartphone
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                 size={20}
               />
               <input
@@ -256,34 +296,63 @@ function Signup() {
                 placeholder="Mobile Number"
                 value={signUpData.phone}
                 onChange={handleChange}
-                className="w-full pl-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className="w-full pl-12 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-300"
               />
             </div>
           )}
 
           {/* Step 4: Password */}
           {step === 4 &&
-            ["password", "confirmPassword"].map((field) => (
+            ["password", "confirmPassword"].map((field, index) => (
               <div key={field} className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                   size={20}
                 />
                 <input
-                  type="password"
+                  type={
+                    index === 0
+                      ? showPassword
+                        ? "text"
+                        : "password"
+                      : showConfirmPassword
+                      ? "text"
+                      : "password"
+                  }
                   name={field}
                   placeholder={field === "password" ? "Password" : "Confirm Password"}
                   value={signUpData[field]}
                   onChange={handleChange}
-                  className="w-full pl-12 p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full pl-12 p-4 bg-gray-50 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-300"
                 />
+                <div
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={
+                    index === 0
+                      ? togglePasswordVisibility
+                      : toggleConfirmPasswordVisibility
+                  }>
+                  {index === 0 ? (
+                    showPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )
+                  ) : showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </div>
               </div>
             ))}
+
+        
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-all">
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
             {loading
               ? step === 1
                 ? "Sending OTP..."
@@ -292,6 +361,15 @@ function Signup() {
               ? "Sign Up"
               : "Next"}
           </button>
+
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2.5 rounded-xl transition">
+              Back
+            </button>
+          )}
         </form>
       </div>
     </div>

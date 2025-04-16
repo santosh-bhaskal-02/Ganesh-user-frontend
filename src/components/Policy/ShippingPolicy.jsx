@@ -1,32 +1,58 @@
 import React from "react";
+import { Truck, CalendarClock, Mail } from "lucide-react";
 
 const ShippingPolicy = () => {
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="max-w-3xl bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold text-orange-600 mb-6">
-          Shipping and Delivery Policy
+    <div className="bg-yellow-50 min-h-screen py-10 px-4 flex justify-center">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md px-6 sm:px-10 py-8 space-y-6">
+        <h1 className="text-3xl font-bold text-yellow-600 border-b pb-4">
+          Shipping & Delivery Policy
         </h1>
-        <p className="text-gray-700 leading-relaxed">
-          You hereby agree that the delivery dates are estimates, unless a fixed date for
-          the delivery has been expressly agreed in writing. The cost for delivery shall
-          be calculated at the time of initiation of the transaction based on the shipping
-          address and will be collected from you as a part of the transaction amount paid
-          for the products and/or services.
-        </p>
-        <p className="text-gray-700 leading-relaxed mt-4">
-          In the event that you do not receive the delivery even after seven days have
-          passed from the estimated date of delivery, you must promptly reach out to us
-          at:
-        </p>
-        <p className="text-gray-700 font-semibold mt-4">
-          Email:{" "}
+
+        {/* Shipping Details */}
+        <section>
+          <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <Truck className="text-yellow-500" size={20} />
+            Delivery Timelines
+          </div>
+          <p className="mt-2 text-gray-700">
+            All idols are dispatched within 2–3 business days of confirmed booking.
+            Delivery typically takes 5–7 days, depending on your location. Delivery
+            timelines are estimates unless specifically confirmed in writing.
+          </p>
+        </section>
+
+        {/* Shipping Charges */}
+        <section>
+          <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <CalendarClock className="text-yellow-500" size={20} />
+            Shipping Charges
+          </div>
+          <p className="mt-2 text-gray-700">
+            Shipping charges are calculated at checkout based on your location and order
+            weight. These charges are collected via RazorPay as part of the total order
+            amount.
+          </p>
+        </section>
+
+        {/* Delivery Issues */}
+        <section>
+          <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <Mail className="text-yellow-500" size={20} />
+            Delayed or Missing Deliveries
+          </div>
+          <p className="mt-2 text-gray-700">
+            If your idol hasn't arrived within 7 days of the expected delivery date,
+            please contact us immediately:
+          </p>
           <a
             href="mailto:santoshbhaskal2127@gmail.com"
-            className="text-blue-600 hover:underline">
+            className="mt-1 flex items-center text-yellow-600 font-medium hover:underline"
+          >
+            <Mail size={18} className="mr-1" />
             santoshbhaskal2127@gmail.com
           </a>
-        </p>
+        </section>
       </div>
     </div>
   );

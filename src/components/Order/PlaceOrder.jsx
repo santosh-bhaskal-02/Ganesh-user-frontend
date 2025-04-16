@@ -3,6 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import AlertBox from "../404ErrorPage/AlertBox";
+import SkeletonPlaceOrder from "./SkeletonPlaceOrder";
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
+import {
+  ShoppingBag as ShoppingBagIcon,
+  LocalShipping as LocalShippingIcon,
+  ReceiptLong as ReceiptLongIcon,
+  CurrencyRupee as CurrencyRupeeIcon,
+  Paid as PaidIcon,
+  ArrowBack as ArrowBackIcon,
+} from "@mui/icons-material";
+import { motion } from "framer-motion";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -17,7 +28,6 @@ const PlaceOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
-  const [order_id, setOrder_id] = useState(null);
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
@@ -84,8 +94,6 @@ const PlaceOrder = () => {
         }
       );
 
-      console.log(response);
-
       if (response.status === 200) {
         const orderId = response.data.order.id;
         const options = {
@@ -97,7 +105,6 @@ const PlaceOrder = () => {
           order_id: response.data.razorpayOrder.id,
 
           handler: async function (response) {
-            console.log(response);
             await axios.post(`${apiUrl}/api/products/orders/verify_payment`, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -120,7 +127,7 @@ const PlaceOrder = () => {
             email: response.data.user.email,
             contact: response.data.user.phone,
           },
-          theme: { color: "#F37254" },
+          theme: { color: "#FBBF24" },
         };
 
         const razorpay = new window.Razorpay(options);
@@ -146,26 +153,20 @@ const PlaceOrder = () => {
   const taxes = 5.52;
   const total = idol ? idol.price * quantity + shipping + taxes : 0;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-gray-500 text-lg">Loading idol details...</p>
-      </div>
-    );
-  }
-
   if (error || !idol) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <p className="text-red-500 text-lg">
-          Failed to load idol details. Please try again later.
-        </p>
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <SkeletonPlaceOrder />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-white py-10 px-4 md:px-6"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}>
       {alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
           <AlertBox
@@ -176,93 +177,113 @@ const PlaceOrder = () => {
           />
         </div>
       )}
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Order Summary</h2>
-
-        {/* Product Details */}
-        <div className="flex items-center space-x-6 border-b pb-4 mb-4">
-          <img
-            src={idol.thumbnail}
-            alt={idol.title}
-            className="w-24 h-24 object-cover rounded-lg shadow"
-          />
-          <div className="flex-1">
-            <h3 className="text-lg font-medium text-gray-700">{idol.title}</h3>
-            <p className="text-sm text-gray-500">Price: ₹{idol.price}</p>
-            <div className="flex items-center mt-2 space-x-2">
-              <span className="text-sm text-gray-600">Quantity:</span>
-              <select
-                value={quantity}
-                onChange={(e) => handleQuantityChange(e.target.value)}
-                className="border rounded-md p-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                {[1, 2, 3, 4, 5].map((qty) => (
-                  <option key={qty} value={qty}>
-                    {qty}
-                  </option>
-                ))}
-              </select>
+      {orderLoading && <LoadingSpinner />}
+      {/* Step Progress Bar */}
+      <div className="flex justify-center gap-4 mb-8">
+        {["Cart", "Shipping", "Payment"].map((step, index) => (
+          <div
+            key={step}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600">
+            <div
+              className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                index < 2 ? "bg-yellow-400 text-black" : "bg-gray-300 text-white"
+              }`}>
+              {index + 1}
             </div>
+            {step}
+            {index < 2 && <div className="w-6 h-0.5 bg-gray-300 mx-2" />}
           </div>
-        </div>
-
-        {/* Pricing Details */}
-        <div className="space-y-4">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">₹{(idol.price * quantity).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Shipping</span>
-            <span className="font-medium">₹{shipping.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Taxes</span>
-            <span className="font-medium">₹{taxes.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between border-t pt-4">
-            <span className="text-lg font-bold">Total</span>
-            <span className="text-lg font-bold">₹{total.toFixed(2)}</span>
-          </div>
-        </div>
-
-        {/* Buttons */}
-        <button
-          onClick={() => checkoutPayment(idol.id)}
-          disabled={orderLoading}
-          className={`w-full py-2 rounded-lg mt-6 text-lg font-medium transition ${
-            orderLoading
-              ? "bg-blue-400 text-white cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}>
-          {orderLoading ? (
-            <div className="flex items-center justify-center">
-              <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8z"></path>
-              </svg>
-              Placing Order...
-            </div>
-          ) : (
-            "Pay Now"
-          )}
-        </button>
-
-        <button
-          onClick={() => navigate(-1)}
-          className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg mt-4 text-lg font-medium hover:bg-gray-200 transition">
-          Go Back
-        </button>
+        ))}
       </div>
-    </div>
+
+      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-8 p-8">
+          {/* Product Info */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Review Your Order</h2>
+            <div className="flex gap-4 items-start">
+              <img
+                src={idol.thumbnail}
+                alt={idol.title}
+                className="w-32 h-32 object-cover rounded-xl shadow-md"
+              />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-700">{idol.title}</h3>
+                <p className="text-gray-600">Price: ₹{idol.price}</p>
+                <div className="mt-3">
+                  <label className="text-sm font-medium text-gray-600">Quantity:</label>
+                  <select
+                    value={quantity}
+                    onChange={(e) => handleQuantityChange(e.target.value)}
+                    className="ml-2 px-3 py-1 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                    {[1, 2, 3, 4, 5].map((qty) => (
+                      <option key={qty} value={qty}>
+                        {qty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Summary */}
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Order Summary</h2>
+            <div className="space-y-4">
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <ShoppingBagIcon fontSize="small" /> Subtotal
+                </span>
+                <span>₹{(idol.price * quantity).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <LocalShippingIcon fontSize="small" /> Shipping
+                </span>
+                <span>₹{shipping.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span className="flex items-center gap-2">
+                  <ReceiptLongIcon fontSize="small" /> Taxes
+                </span>
+                <span>₹{taxes.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
+                <span className="flex items-center gap-2">
+                  <CurrencyRupeeIcon fontSize="small" /> Total
+                </span>
+                <span>₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => checkoutPayment(idol.id)}
+                disabled={orderLoading}
+                className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-lg font-medium transition duration-300 ${
+                  orderLoading
+                    ? "bg-yellow-300 text-yellow-800 cursor-not-allowed"
+                    : "bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg"
+                }`}>
+                <PaidIcon fontSize="small" />
+                {orderLoading ? "Placing Order..." : "Pay Now"}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                onClick={() => navigate(-1)}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-base font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition">
+                <ArrowBackIcon fontSize="small" />
+                Go Back
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

@@ -5,6 +5,7 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../ContextApi/AuthContext";
 import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 import AlertBox from "../404ErrorPage/AlertBox";
+import { Eye, EyeOff } from 'lucide-react';
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -12,9 +13,9 @@ function Login() {
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
-
   const navigate = useNavigate();
   const { setSignIn } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -26,14 +27,14 @@ function Login() {
     password: "",
   });
 
-  function dataInput(event) {
-    const { name, value } = event.target;
-    setLoginData((prevData) => ({ ...prevData, [name]: value }));
-  }
+  const dataInput = (e) => {
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  function validate() {
+  const validate = () => {
     let emailError = "";
-    let passwordError = "";    
+    let passwordError = "";
 
     const emailRegex = /\S+@\S+\.\S+/;
 
@@ -52,21 +53,20 @@ function Login() {
 
     setErrors({ email: "", password: "" });
     return true;
-  }
+  };
 
-  const login = async (event) => {
-    event.preventDefault();
+  const login = async (e) => {
+    e.preventDefault();
     if (!validate()) return;
 
-    setLoadingButton(true);
     setLoading(true);
+    setLoadingButton(true);
 
     try {
       const response = await axios.post(
         `${apiUrl}/api/users/login/authenticate`,
         loginData
       );
-      console.log({response})
 
       if (response.status === 200) {
         setAlert({
@@ -85,7 +85,6 @@ function Login() {
             title: "Oops!",
             message: "Something went wrong. Try again!",
           });
-
           return;
         }
 
@@ -105,10 +104,10 @@ function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-200 px-4">
       {loading && <LoadingSpinner />}
       {alert && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-40 z-50">
           <AlertBox
             type={alert.type}
             title={alert.title}
@@ -117,16 +116,15 @@ function Login() {
           />
         </div>
       )}
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          Sign in to your account
+
+      <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 w-full max-w-md animate-fade-in">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Welcome Back
         </h2>
 
         <form onSubmit={login} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
             <input
               name="email"
               type="email"
@@ -134,30 +132,41 @@ function Login() {
               onChange={dataInput}
               required
               autoComplete="email"
-              className="w-full mt-2 p-3 rounded-lg bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-300 outline-none"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
+              className="w-full px-4 py-3 mt-1 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              name="password"
-              type="password"
-              value={loginData.password}
-              onChange={dataInput}
-              required
-              autoComplete="current-password"
-              className="w-full mt-2 p-3 rounded-lg bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-blue-300 outline-none"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={loginData.password}
+                onChange={dataInput}
+                required
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className="w-full px-4 py-3 mt-1 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+              />
+              <div
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? (
+                  <EyeOff size={20} className="text-blue-400" />
+                ) : (
+                  <Eye size={20} className="text-blue-400" />
+                )}
+              </div>
+            </div>
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
             )}
           </div>
 
-          <div className="text-sm text-center">
+          <div className="text-right text-sm">
             <Link to="/forgot_password" className="text-blue-600 hover:underline">
               Forgot password?
             </Link>
@@ -165,13 +174,16 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-blue-500 hover:bg-blue-600 transition-all duration-200 font-semibold text-white shadow-md disabled:opacity-50"
-            disabled={loadingButton}>
-            {loadingButton ? "Logging In..." : "Log In"}
+            disabled={loadingButton}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50">
+            {loadingButton && (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            )}
+            {loadingButton ? "Logging in..." : "Log In"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-700">
+        <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-600 hover:underline">
             Sign up

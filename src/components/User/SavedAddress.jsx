@@ -21,7 +21,7 @@ function SavedAddress() {
   };
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg bg-white">
       <div className="flex justify-between items-center bg-blue-100 px-6 py-4 border-b">
         <h3 className="text-lg font-semibold text-gray-800">Saved Address</h3>
         <button

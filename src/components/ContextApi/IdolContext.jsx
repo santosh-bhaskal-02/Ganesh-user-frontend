@@ -20,6 +20,7 @@ function IdolProvider({ children }) {
         const response = await axios.get(`${apiUrl}/api/products`);
         const result = response.data.productList;
         setIdolList(result);
+        console.log("idol", response.data);
       } catch (err) {
         console.log(err);
       }

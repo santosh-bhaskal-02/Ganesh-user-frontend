@@ -1,28 +1,35 @@
 import { Link } from "react-router-dom";
-function ErrorPage() {
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+function SignInErrorPage() {
+  const navigate = useNavigate();
   return (
-    <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
-      <div className="text-center">
-        <p className="text-base font-semibold text-indigo-600">404</p>
-        <h1 className="mt-4 text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
-          Page not found
-        </h1>
-        <p className="mt-6 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
-          Sorry, we couldn’t find the page you’re looking for.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link
-            to="/login"
-            className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Sign In
-          </Link>
-          <Link to="/explore" className="text-sm font-semibold text-gray-900">
-            Go back home <span aria-hidden="true">&rarr;</span>
-          </Link>
-        </div>
+    <main className="grid min-h-screen place-items-center bg-gradient-to-tr from-indigo-100 via-white to-purple-100 px-6 py-24 sm:py-32">
+      <div className="text-center bg-white/70 backdrop-blur-lg border border-white/40 shadow-2xl rounded-2xl p-10 max-w-xl w-full">
+        <motion.div>
+          <p className="text-lg font-bold text-indigo-600 animate-pulse">404</p>
+
+          <h1 className="mt-4 text-4xl sm:text-6xl font-extrabold text-gray-900 leading-tight">
+            Oops! Page Not Found
+          </h1>
+
+          <p className="mt-6 text-base sm:text-lg text-gray-600">
+            Sorry, we couldn't find the page you're looking for. It might have been moved
+            or deleted.
+          </p>
+
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate("/explore")}
+            className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:shadow-indigo-300 transition-all duration-300">
+            Browse Products
+          </motion.button>
+        </motion.div>
       </div>
     </main>
   );
 }
 
-export default ErrorPage;
+export default SignInErrorPage;
