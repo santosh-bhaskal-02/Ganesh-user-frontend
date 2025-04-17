@@ -67,7 +67,10 @@ function Idoldetails() {
       setAlert({
         type: "error",
         title: "Oops!",
-        message: err.response?.data?.message || err.message || "Something went wrong. Try again!",
+        message:
+          err.response?.data?.message ||
+          err.message ||
+          "Something went wrong. Try again!",
       });
       console.error("Error adding to cart:", err);
     }
@@ -107,14 +110,16 @@ function Idoldetails() {
             </p>
 
             <div className="flex items-center gap-3 mt-2">
-              <span className="text-3xl font-semibold text-green-600">₹ {idol.price}</span>
+              <span className="text-3xl font-semibold text-green-600">
+                ₹ {idol.price}
+              </span>
               <span className="text-sm bg-red-100 text-red-600 font-medium px-2 py-1 rounded-full flex items-center gap-1">
                 <Info className="w-4 h-4" /> Limited Stock
               </span>
             </div>
 
             <p className="text-gray-700 leading-relaxed flex gap-2">
-              <Info className="w-5 h-5 text-gray-500 mt-1" /> {idol.reachDisciption}
+              <Info className="w-5 h-5 text-gray-500 mt-1" /> {idol.description}
             </p>
 
             <div className="flex items-center space-x-4">
@@ -126,7 +131,9 @@ function Idoldetails() {
                   disabled={quantity <= 1}>
                   <Minus className="w-4 h-4 text-gray-700" />
                 </button>
-                <span className="px-6 py-2 text-lg font-medium text-gray-800">{quantity}</span>
+                <span className="px-6 py-2 text-lg font-medium text-gray-800">
+                  {quantity}
+                </span>
                 <button
                   onClick={() => setQuantity((prev) => Math.min(5, prev + 1))}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 transition"
@@ -162,7 +169,11 @@ function Idoldetails() {
           modules={[Navigation, Pagination]}
           spaceBetween={20}
           slidesPerView={1}
-          breakpoints={{ 640: { slidesPerView: 2 }, 768: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } }}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+          }}
           navigation
           pagination={{ clickable: true }}>
           {loading
@@ -183,7 +194,9 @@ function Idoldetails() {
                       loading="lazy"
                     />
                     <div className="p-4 text-center">
-                      <h3 className="text-lg font-semibold text-gray-800">{idol.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {idol.title}
+                      </h3>
                       <p className="text-gray-600 text-sm">₹{idol.price}</p>
                     </div>
                   </div>
