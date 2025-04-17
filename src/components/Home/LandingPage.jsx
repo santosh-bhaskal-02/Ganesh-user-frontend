@@ -74,7 +74,7 @@ function Home() {
                 <div className="p-6">
                   <h3 className="text-xl font-semibold">{idol.title}</h3>
                   <p className="mt-2 text-gray-600">
-                    {idol.reachDisciption.split(" ").slice(0, 20).join(" ")}...
+                    {idol.description.split(" ").slice(0, 20).join(" ")}...
                   </p>
                 </div>
               </div>
