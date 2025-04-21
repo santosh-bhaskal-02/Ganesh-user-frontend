@@ -24,6 +24,7 @@ function Idoldetails() {
   const { idolList } = useContext(IdolContext);
   const [idol, setIdol] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingSkeleton, setLoadingSkeleton] = useState(true);
   const [error, setError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [imageSrc, setImageSrc] = useState("");
@@ -33,7 +34,7 @@ function Idoldetails() {
 
   useEffect(() => {
     const fetchIdolDetails = async () => {
-      setLoading(true);
+      setLoadingSkeleton(true);
       try {
         const response = await axios.get(`${apiUrl}/api/products/${pid}`);
         if (response.status === 200) {
@@ -44,7 +45,7 @@ function Idoldetails() {
         console.error("Error fetching idol details:", err);
         setError(true);
       } finally {
-        setLoading(false);
+        setLoadingSkeleton(false);
       }
     };
 
@@ -52,6 +53,7 @@ function Idoldetails() {
   }, [pid]);
 
   const addToCart = async (productId) => {
+    setLoading(true);
     if (!userId || !authToken) {
       setAlert({
         type: "error",
@@ -81,6 +83,8 @@ function Idoldetails() {
           "Something went wrong. Try again!",
       });
       console.error("Error adding to cart:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,8 +98,9 @@ function Idoldetails() {
           <AlertBox {...alert} onClick={() => setAlert(null)} />
         </div>
       )}
+      {loading && <LoadingSpinner />}
 
-      {loading ? (
+      {loadingSkeleton ? (
         <SkeletanIdolDetails />
       ) : (
         <div className="flex flex-col md:flex-row bg-white rounded-xl shadow-xl p-8 w-full max-w-6xl">
@@ -195,7 +200,7 @@ function Idoldetails() {
           }}
           navigation
           pagination={{ clickable: true }}>
-          {loading
+          {loadingSkeleton
             ? Array.from({ length: 12 }).map((_, index) => (
                 <SwiperSlide key={index}>
                   <SkeletonIdolList />
