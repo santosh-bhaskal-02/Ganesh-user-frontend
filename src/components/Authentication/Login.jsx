@@ -5,12 +5,12 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../ContextApi/AuthContext";
 import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 import AlertBox from "../404ErrorPage/AlertBox";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
 function Login() {
-  const [alert, setAlert] = useState(null);
+  const [Alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ function Login() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-200 px-4">
       {loading && <LoadingSpinner />}
-      {alert && (
+      {Alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-40 z-50">
           <AlertBox
             type={alert.type}

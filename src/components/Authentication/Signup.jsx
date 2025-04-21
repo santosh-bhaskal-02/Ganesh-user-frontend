@@ -347,8 +347,6 @@ function Signup() {
               </div>
             ))}
 
-        
-
           {/* Submit Button */}
           <button
             type="submit"
