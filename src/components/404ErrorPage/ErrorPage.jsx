@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-function SignInErrorPage() {
+function ErrorPage() {
   const navigate = useNavigate();
   return (
     <main className="grid min-h-screen place-items-center bg-gradient-to-tr from-indigo-100 via-white to-purple-100 px-6 py-24 sm:py-32">
@@ -32,4 +32,4 @@ function SignInErrorPage() {
   );
 }
 
-export default SignInErrorPage;
+export default ErrorPage;

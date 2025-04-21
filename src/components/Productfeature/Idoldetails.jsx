@@ -53,8 +53,16 @@ function Idoldetails() {
 
   const addToCart = async (productId) => {
     if (!userId || !authToken) {
-      setAlert({ type: "error", title: "Oops!", message: "Please Sign In" });
-      return navigate(`/login`);
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: "Please Sign In",
+      });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      return;
     }
     try {
       const response = await axios.post(
@@ -95,7 +103,7 @@ function Idoldetails() {
             <img
               src={imageSrc}
               alt={idol.title}
-              className="w-full md:w-96 rounded-lg shadow-md transform hover:scale-105 transition duration-300"
+              className="w-full md:w-96 rounded-lg"
               loading="lazy"
               onError={() => setImageSrc("fallback-image.jpg")}
             />
@@ -114,7 +122,8 @@ function Idoldetails() {
                 ₹ {idol.price}
               </span>
               <span className="text-sm bg-red-100 text-red-600 font-medium px-2 py-1 rounded-full flex items-center gap-1">
-                <Info className="w-4 h-4" /> Limited Stock
+                <Info className="w-4 h-4" />
+                {idol.stock > 0 ? "Limited Stock" : "Out of Stock"}
               </span>
             </div>
 
@@ -122,39 +131,49 @@ function Idoldetails() {
               <Info className="w-5 h-5 text-gray-500 mt-1" /> {idol.description}
             </p>
 
-            <div className="flex items-center space-x-4">
-              <span className="font-semibold text-gray-700">Quantity:</span>
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 transition"
-                  disabled={quantity <= 1}>
-                  <Minus className="w-4 h-4 text-gray-700" />
-                </button>
-                <span className="px-6 py-2 text-lg font-medium text-gray-800">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity((prev) => Math.min(5, prev + 1))}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 transition"
-                  disabled={quantity >= 5}>
-                  <Plus className="w-4 h-4 text-gray-700" />
-                </button>
+            {idol.stock > 0 && (
+              <div className="flex items-center space-x-4">
+                <span className="font-semibold text-gray-700">Quantity:</span>
+                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 transition"
+                    disabled={quantity <= 1}>
+                    <Minus className="w-4 h-4 text-gray-700" />
+                  </button>
+                  <span className="px-6 py-2 text-lg font-medium text-gray-800">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity((prev) => Math.min(5, prev + 1))}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 transition"
+                    disabled={quantity >= 5}>
+                    <Plus className="w-4 h-4 text-gray-700" />
+                  </button>
+                </div>
+                <span className="text-sm text-gray-500">(Max 5)</span>
               </div>
-              <span className="text-sm text-gray-500">(Max 5)</span>
-            </div>
+            )}
 
-            <div className="flex space-x-4 mt-4">
-              <button
-                onClick={() => buyNow(idol.id)}
-                className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold rounded-lg hover:shadow-md transition">
-                Buy Now
-              </button>
-              <button
-                onClick={() => addToCart(idol.id)}
-                className="flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
-                <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
-              </button>
+            <div className="flex flex-wrap items-center gap-4 mt-4">
+              {idol.stock > 0 ? (
+                <>
+                  <button
+                    onClick={() => buyNow(idol.id)}
+                    className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold rounded-lg hover:shadow-md transition">
+                    Buy Now
+                  </button>
+                  <button
+                    onClick={() => addToCart(idol.id)}
+                    className="flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                    <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+                  </button>
+                </>
+              ) : (
+                <span className="px-6 py-3 bg-red-100 text-red-600 font-semibold rounded-lg">
+                  Out of Stock
+                </span>
+              )}
               <button className="p-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
                 <Heart className="w-5 h-5 text-gray-600" />
               </button>

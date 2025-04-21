@@ -28,6 +28,7 @@ const PlaceOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
+  const [taxDeliveryCharge, setTaxDeliveryCharge] = useState({});
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
@@ -35,15 +36,23 @@ const PlaceOrder = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/api/products/${pid}`);
-        const { id, title, thumbnail, price } = response.data;
+        const [resProduct, resCharges] = await Promise.all([
+          await axios.get(`${apiUrl}/api/products/${pid}`),
+          await axios.get(`${apiUrl}/api/charges/fetch`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+        ]);
+        if (resProduct && resCharges) {
+          const { id, title, thumbnail, price } = resProduct.data;
 
-        setIdol({
-          id,
-          title,
-          thumbnail: thumbnail.image_url,
-          price,
-        });
+          setIdol({
+            id,
+            title,
+            thumbnail: thumbnail.image_url,
+            price,
+          });
+          setTaxDeliveryCharge(resCharges.data);
+        }
       } catch (err) {
         console.error("Error fetching product details:", err);
         setError(true);
@@ -69,13 +78,35 @@ const PlaceOrder = () => {
     });
   };
 
+  let shippingCharge = 0.0;
+  let taxCharge = 0.0;
+  let subTotal = idol ? idol.price + shippingCharge + taxCharge : 0;
+
+  const handleQuantityChange = (newQuantity) => {
+    setQuantity(Number(newQuantity));
+  };
+
+  //console.log("169", cart);
+  if (idol) {
+    shippingCharge = taxDeliveryCharge.deliveryCharge;
+    taxCharge = (idol.price * taxDeliveryCharge.taxRate) / 100;
+    subTotal = isNaN(idol.price * quantity) ? 0 : idol.price * quantity;
+  }
+
+  const calculateTotal = subTotal + shippingCharge + taxCharge;
+
   const checkoutPayment = async (productId) => {
     setOrderLoading(true);
 
     try {
       const isRazorpayLoaded = await loadRazorpay();
       if (!isRazorpayLoaded) {
-        alert("Failed to load Razorpay. Please try again.");
+        setAlert({
+          type: "error",
+          title: "Oops!",
+          message: "Failed to load Razorpay. Please try again.",
+        });
+
         setOrderLoading(false);
         return;
       }
@@ -85,6 +116,10 @@ const PlaceOrder = () => {
         {
           orderItem: [{ productId, quantity }],
           user: userId,
+          taxCharge,
+          shippingCharge,
+          subTotal,
+          totalPrice: calculateTotal,
         },
         {
           headers: {
@@ -134,24 +169,16 @@ const PlaceOrder = () => {
         razorpay.open();
       }
     } catch (err) {
-      console.error("Error placing order:", err);
+      console.error("Error placing order:", err.response);
       setAlert({
         type: "error",
         title: "Oops!",
-        message: "Failed to place order. Please try again.",
+        message: err.response.data.message || err.data || err,
       });
     } finally {
       setOrderLoading(false);
     }
   };
-
-  const handleQuantityChange = (newQuantity) => {
-    setQuantity(Number(newQuantity));
-  };
-
-  const shipping = 5.0;
-  const taxes = 5.52;
-  const total = idol ? idol.price * quantity + shipping + taxes : 0;
 
   if (error || !idol) {
     return (
@@ -235,25 +262,25 @@ const PlaceOrder = () => {
                 <span className="flex items-center gap-2">
                   <ShoppingBagIcon fontSize="small" /> Subtotal
                 </span>
-                <span>₹{(idol.price * quantity).toFixed(2)}</span>
+                <span>₹{subTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <LocalShippingIcon fontSize="small" /> Shipping
                 </span>
-                <span>₹{shipping.toFixed(2)}</span>
+                <span>₹{shippingCharge.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <ReceiptLongIcon fontSize="small" /> Taxes
                 </span>
-                <span>₹{taxes.toFixed(2)}</span>
+                <span>₹{taxCharge.toFixed(2)}</span>
               </div>
               <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
                 <span className="flex items-center gap-2">
                   <CurrencyRupeeIcon fontSize="small" /> Total
                 </span>
-                <span>₹{total.toFixed(2)}</span>
+                <span>₹{calculateTotal.toFixed(2)}</span>
               </div>
             </div>
 

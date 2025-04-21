@@ -13,6 +13,7 @@ import {
   Info,
 } from "lucide-react";
 import AlertBox from "../404ErrorPage/AlertBox";
+import SignInErrorPage from "../404ErrorPage/SignInErrorPage";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -31,8 +32,7 @@ function CustomForm() {
   const authToken = Cookies.get("authToken");
 
   if (!userId || !authToken) {
-    navigate("/login");
-    return null;
+    return <SignInErrorPage />;
   }
 
   const handleChange = (e) => {
@@ -65,7 +65,7 @@ function CustomForm() {
 
     try {
       const response = await axios.post(
-        `${apiUrl}/api/products/add/custom_product/${userId}`,
+        `${apiUrl}/api/custom-idol/add/${userId}`,
         formData,
         {
           headers: {

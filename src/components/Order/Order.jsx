@@ -64,7 +64,7 @@ function Order() {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-gradient-to-br from-pink-50 via-white to-blue-50 rounded-2xl overflow-hidden">
           <div className="space-y-8 p-8">
             <h2 className="text-3xl font-bold text-indigo-800 mb-8">Your Orders</h2>
 
@@ -74,46 +74,58 @@ function Order() {
               orderDetails.map((order) => (
                 <motion.div
                   key={order._id}
-                  className="flex gap-6 items-center justify-between border-b pb-6 mb-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}>
+                  className="flex flex-col md:flex-row gap-6 border-b border-gray-200 rounded-xl p-2 md:p-6 bg-white hover:shadow-sm transition-all duration-300"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}>
                   <Link
                     to={`/order-details/${order._id}`}
-                    className="flex items-center gap-4 hover:scale-105 transition-all duration-300 hover:bg-indigo-50 p-4 rounded-lg">
+                    className="flex flex-col md:flex-row w-full gap-4 items-start md:items-center">
+                    {/* Product Image */}
                     <img
                       src={order.orderItems[0].product.thumbnail.image_url}
                       alt="Product"
-                      className="w-32 h-32 object-cover rounded-xl shadow-lg transition-transform duration-200 transform hover:scale-110"
+                      className="w-full md:w-36 h-36 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                     />
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-800">
+
+                    {/* Product Details */}
+                    <div className="flex flex-col gap-2 flex-grow">
+                      <h3 className="text-lg md:text-xl font-semibold text-gray-800">
                         {order.orderItems[0].product.title}
                       </h3>
-                      <div className="text-gray-600">
-                        <p className="text-sm flex items-center gap-2">
-                          <LocalShippingIcon fontSize="small" className="text-blue-500" />{" "}
-                          <span>
-                            Delivery Date:{" "}
-                            {new Date(order.deliveryDate).toLocaleDateString()}
+
+                      <p className="text-sm text-gray-600 flex items-center gap-2">
+                        <LocalShippingIcon fontSize="small" className="text-blue-500" />
+                        <span>
+                          Delivery Date:&nbsp;
+                          <span className="font-medium text-gray-800">
+                            {new Date(order.deliveredAt).toLocaleDateString()}
                           </span>
-                        </p>
-                      </div>
+                        </span>
+                      </p>
+
+                      <p className="text-sm text-gray-600 flex items-center gap-2">
+                        <ReceiptLongIcon fontSize="small" className="text-yellow-600" />
+                        <span>
+                          Status:&nbsp;
+                          <span className="font-medium text-gray-800">
+                            {order.status}
+                          </span>
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Price Details */}
+                    <div className="flex flex-col items-end justify-between ml-auto gap-2">
+                      <p className="text-lg font-semibold text-green-600 flex items-center gap-1">
+                        <CurrencyRupeeIcon fontSize="small" />
+                        {order.orderItems[0].product.price}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Order ID: {order._id.toUpperCase()}
+                      </p>
                     </div>
                   </Link>
-
-                  <div className="ml-auto flex flex-col items-end gap-2">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <CurrencyRupeeIcon fontSize="small" className="text-green-600" />
-                      <span className="text-lg font-semibold">
-                        ₹{order.orderItems[0].product.price}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <ReceiptLongIcon fontSize="small" className="text-yellow-600" />
-                      <span className="text-sm font-medium">{order.status}</span>
-                    </div>
-                  </div>
                 </motion.div>
               ))
             )}

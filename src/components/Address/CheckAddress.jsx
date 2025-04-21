@@ -5,6 +5,8 @@ import axios from "axios";
 import ErrorPage from "../404ErrorPage/ErrorPage";
 import SkeletonAddressCard from "./SkeletonAddressCard";
 import { motion } from "framer-motion";
+import SignInErrorPage from "../404ErrorPage/SignInErrorPage";
+import AlertBox from "../404ErrorPage/AlertBox";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -12,6 +14,7 @@ function CheckAddress() {
   const navigate = useNavigate();
   const { pid } = useParams();
   const [loading, setLoading] = useState(true);
+  const [Alert, setAlert] = useState(null);
   const [addressDetails, setAddressDetails] = useState({
     firstName: "",
     lastName: "",
@@ -28,10 +31,12 @@ function CheckAddress() {
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
 
-  if (!userId || !authToken) {
-    console.error("User is not authenticated. Missing token or userId.");
-    return <ErrorPage />;
-  }
+  useEffect(() => {
+    if (!userId || !authToken) {
+      console.error("User is not authenticated. Missing token or userId.");
+      return navigate(`/login`);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     async function fetchAddress() {
@@ -77,8 +82,7 @@ function CheckAddress() {
       className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-white py-12 px-6"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+      transition={{ duration: 0.4 }}>
       {loading ? (
         <SkeletonAddressCard />
       ) : (
@@ -88,8 +92,7 @@ function CheckAddress() {
             <h2 className="text-2xl font-bold text-gray-800">Shipping Address</h2>
             <button
               onClick={handleEdit}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
-            >
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
               Edit
             </button>
           </div>
@@ -98,7 +101,9 @@ function CheckAddress() {
           <div className="px-8 py-6 space-y-4 text-gray-700">
             <div>
               <h3 className="text-lg font-semibold text-gray-800">Name</h3>
-              <p>{addressDetails.firstName} {addressDetails.lastName}</p>
+              <p>
+                {addressDetails.firstName} {addressDetails.lastName}
+              </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-800">Email</h3>
@@ -138,8 +143,7 @@ function CheckAddress() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               onClick={handleCancel}
-              className="px-6 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-red-500 hover:text-white transition"
-            >
+              className="px-6 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-red-500 hover:text-white transition">
               Cancel
             </motion.button>
             <motion.button
@@ -150,8 +154,7 @@ function CheckAddress() {
                 loading
                   ? "bg-blue-300 text-gray-100 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
+              }`}>
               {loading ? "Loading..." : "Continue"}
             </motion.button>
           </div>

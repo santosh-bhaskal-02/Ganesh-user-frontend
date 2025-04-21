@@ -25,6 +25,7 @@ function Cart() {
   const [alert, setAlert] = useState(null);
   const [quantities, setQuantities] = useState({});
   const [loadingQuantity, setLoadingQuantity] = useState(false);
+  const [taxDeliveryCharge, setTaxDeliveryCharge] = useState({});
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
@@ -37,21 +38,29 @@ function Cart() {
   useEffect(() => {
     async function fetchCart() {
       try {
-        const response = await axios.get(`${apiUrl}/api/products/cart/${userId}`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        const [resCart, resCharges] = await Promise.all([
+          await axios.get(`${apiUrl}/api/products/cart/${userId}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+          await axios.get(`${apiUrl}/api/charges/fetch`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+        ]);
 
-        if (response.status === 200) {
-          setCart(response.data);
+        if (resCart.status === 200 && resCharges.status === 200) {
+          //console.log(resCharges.data);
+          setCart(resCart.data);
+          setTaxDeliveryCharge(resCharges.data);
 
           const initialQuantities = {};
-          response.data.cartItems.forEach((item) => {
+
+          resCart.data.cartItems.forEach((item) => {
             initialQuantities[item._id] = item.quantity;
           });
           setQuantities(initialQuantities);
         }
       } catch (err) {
-        console.error(err.response?.data || err.message);
+        console.error(err.resCart?.data || err.message);
       } finally {
         setLoading(false);
       }
@@ -64,41 +73,54 @@ function Cart() {
   const updateQuantity = async (id, action) => {
     setLoadingQuantity(true);
     try {
-      // Determine the new quantity based on the action
       let newQuantity = action === "increment" ? quantities[id] + 1 : quantities[id] - 1;
 
-      // Ensure the quantity doesn't exceed the max limit or go below 1
       if (newQuantity > maxQuantity) {
-        alert(`You can only order up to ${maxQuantity} items.`);
-        setLoadingQuantity(false);
-        return; // Prevent further action if the limit is exceeded
-      }
-      newQuantity = Math.max(newQuantity, 1); // Prevent going below 1
+        setAlert({
+          type: "error",
+          title: "Oops!",
+          message: `You can only order up to ${maxQuantity} items.`,
+        });
 
-      // Update the local state with the new quantity
+        setLoadingQuantity(false);
+        return;
+      }
+      if (newQuantity < 1) {
+        setLoadingQuantity(false);
+        return;
+      }
+
       setQuantities((prev) => ({ ...prev, [id]: newQuantity }));
 
-      // Update the cart state
       setCart((prevCart) => {
         const updatedCartItems = prevCart.cartItems.map((item) =>
           item._id === id ? { ...item, quantity: newQuantity } : item
         );
 
-        const newTotalPrice = updatedCartItems.reduce(
-          (acc, item) => acc + item.quantity * item.product.price,
-          0
-        );
+        const newTotalPrice = updatedCartItems.reduce((acc, item) => {
+          const price = item.product.price || 0;
+          const quantity = item.quantity || 0;
+          return acc + quantity * price;
+        }, 0);
 
         return { ...prevCart, cartItems: updatedCartItems, totalPrice: newTotalPrice };
       });
 
-      // Send the updated quantity to the server
-      await axios.put(
+      const response = await axios.put(
         `${apiUrl}/api/products/cart/update`,
         { userId, productId: id, action },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
+
+      console.log("Quantity update", response.data);
     } catch (error) {
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: `Error updating quantity:", ${
+          error.response?.data.message || error.message
+        }`,
+      });
       console.error("Error updating quantity:", error.response?.data || error.message);
     } finally {
       setLoadingQuantity(false);
@@ -107,23 +129,54 @@ function Cart() {
 
   const removeItem = async (id) => {
     try {
+      // Call the backend to remove the item
       await axios.delete(`${apiUrl}/api/products/cart/remove/${id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
-      setCart((prevCart) => ({
-        ...prevCart,
-        cartItems: prevCart.cartItems.filter((item) => item._id !== id),
-      }));
+      // Update local cart state
+      setCart((prevCart) => {
+        const updatedCartItems = prevCart.cartItems.filter((item) => item._id !== id);
+
+        const newTotalPrice = updatedCartItems.reduce((acc, item) => {
+          const price = item.product.price || 0;
+          const quantity = item.quantity || 0;
+          return acc + quantity * price;
+        }, 0);
+
+        return { ...prevCart, cartItems: updatedCartItems, totalPrice: newTotalPrice };
+      });
     } catch (error) {
+      setAlert({
+        type: "error",
+        title: "Oops!",
+        message: `Error removing item: ${error.response?.data.message || error.message}`,
+      });
       console.error("Error removing item:", error.response?.data || error.message);
     }
   };
 
-  if (!cart || cart.cartItems.length === 0) return <EmptyCart />;
-  const shippingCharge = 10.0;
-  const taxCharge = 5.0;
+  //console.log("168", taxDeliveryCharge);
+  let shippingCharge = 0.0;
+  let taxCharge = 0.0;
+  let subtotal = cart ? cart.totalPrice + shippingCharge + taxCharge : 0;
+
+  //console.log("169", cart);
+  if (cart) {
+    shippingCharge = taxDeliveryCharge.deliveryCharge;
+    taxCharge = (cart.totalPrice * taxDeliveryCharge.taxRate) / 100;
+    subtotal = isNaN(cart.totalPrice) ? 0 : cart.totalPrice;
+  }
+
   const calculateTotal = (subtotal) => subtotal + shippingCharge + taxCharge;
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+    return <EmptyCart />;
+  }
 
   return (
     <motion.div
@@ -186,14 +239,15 @@ function Cart() {
                 <div className="flex items-center gap-6">
                   <div className="flex items-center border rounded-md">
                     <button
-                      disabled={loadingQuantity}
+                      disabled={loadingQuantity || quantities[item._id] <= 1}
                       className="px-3 py-1 text-gray-700"
                       onClick={() => updateQuantity(item._id, "decrement")}>
                       -
                     </button>
+
                     <span className="px-4 py-1">{quantities[item._id]}</span>
                     <button
-                      disabled={loadingQuantity}
+                      disabled={loadingQuantity || quantities[item._id] >= maxQuantity}
                       className="px-3 py-1 text-gray-700"
                       onClick={() => updateQuantity(item._id, "increment")}>
                       +
@@ -217,19 +271,19 @@ function Cart() {
                 <span className="flex items-center gap-2">
                   <ShoppingBagIcon fontSize="small" /> Subtotal
                 </span>
-                <span>₹{cart.totalPrice}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <LocalShippingIcon fontSize="small" /> Shipping
                 </span>
-                <span>₹{shippingCharge.toFixed(2)}</span>
+                <span>₹{parseFloat(shippingCharge).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <ReceiptLongIcon fontSize="small" /> Taxes
                 </span>
-                <span>₹{taxCharge.toFixed(2)}</span>
+                <span>₹{parseFloat(taxCharge).toFixed(2)}</span>
               </div>
               <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
                 <span className="flex items-center gap-2">

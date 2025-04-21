@@ -27,6 +27,7 @@ const PlaceOrderCart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
+  const [taxDeliveryCharge, setTaxDeliveryCharge] = useState({});
 
   const userId = Cookies.get("userId");
   const authToken = Cookies.get("authToken");
@@ -39,13 +40,20 @@ const PlaceOrderCart = () => {
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/api/products/cart/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          credentials: "include",
-        });
-        setCart(response.data);
+        const [resCart, resCharges] = await Promise.all([
+          await axios.get(`${apiUrl}/api/products/cart/${userId}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+          await axios.get(`${apiUrl}/api/charges/fetch`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+        ]);
+
+        //console.log("55", resCart);
+        if (resCart.status === 200 && resCharges.status === 200) {
+          setCart(resCart.data);
+          setTaxDeliveryCharge(resCharges.data);
+        }
       } catch (err) {
         setError(true);
         console.error("Error fetching cart:", err);
@@ -71,13 +79,30 @@ const PlaceOrderCart = () => {
     });
   };
 
+  let shippingCharge = 0.0;
+  let taxCharge = 0.0;
+  let subTotal = cart ? cart.totalPrice + shippingCharge + taxCharge : 0;
+
+  //console.log("169", cart);
+  if (cart) {
+    shippingCharge = taxDeliveryCharge.deliveryCharge;
+    taxCharge = (cart.totalPrice * taxDeliveryCharge.taxRate) / 100;
+    subTotal = isNaN(cart.totalPrice) ? 0 : cart.totalPrice;
+  }
+
+  const calculateTotal = subTotal + shippingCharge + taxCharge;
+
   const checkoutPayment = async () => {
     setOrderLoading(true);
-
     try {
       const isRazorpayLoaded = await loadRazorpay();
       if (!isRazorpayLoaded) {
-        alert("Failed to load Razorpay. Please try again.");
+        setAlert({
+          type: "error",
+          title: "Oops!",
+          message: "Failed to load Razorpay. Please try again.",
+        });
+
         setOrderLoading(false);
         return;
       }
@@ -87,6 +112,10 @@ const PlaceOrderCart = () => {
         {
           orderItem: cart.cartItems,
           user: userId,
+          taxCharge,
+          shippingCharge,
+          subTotal,
+          totalPrice: calculateTotal,
         },
         {
           headers: {
@@ -98,6 +127,7 @@ const PlaceOrderCart = () => {
 
       if (response.status === 200) {
         const orderId = response.data.order.id;
+        console.log("ordercart at line 129", response.data);
         const options = {
           key: razorpayKey,
           amount: response.data.razorpayOrder.amount,
@@ -125,11 +155,11 @@ const PlaceOrderCart = () => {
 
           prefill: {
             name:
-              response.data.user.address.firstName +
+              response.data.order.user.firstName +
               " " +
-              response.data.user.address.lastName,
-            email: response.data.user.email,
-            contact: response.data.user.phone,
+              response.data.order.user.lastName,
+            email: response.data.order.user.email,
+            contact: response.data.order.user.phone,
           },
           theme: { color: "#FBBF24" },
         };
@@ -138,6 +168,7 @@ const PlaceOrderCart = () => {
         razorpay.open();
       }
     } catch (err) {
+      console.log(err);
       setAlert({
         type: "error",
         title: "Oops!",
@@ -146,10 +177,6 @@ const PlaceOrderCart = () => {
       setOrderLoading(false);
     }
   };
-
-  const shipping = 5.0;
-  const taxes = 5.52;
-  const total = cart ? cart.totalPrice + shipping + taxes : 0;
 
   if (orderLoading) {
     return <LoadingSpinner />;
@@ -235,25 +262,25 @@ const PlaceOrderCart = () => {
                 <span className="flex items-center gap-2">
                   <ShoppingBagIcon fontSize="small" /> Subtotal
                 </span>
-                <span>₹{cart.totalPrice.toFixed(2)}</span>
+                <span>₹{subTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <LocalShippingIcon fontSize="small" /> Shipping
                 </span>
-                <span>₹{shipping.toFixed(2)}</span>
+                <span>₹{shippingCharge.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span className="flex items-center gap-2">
                   <ReceiptLongIcon fontSize="small" /> Taxes
                 </span>
-                <span>₹{taxes.toFixed(2)}</span>
+                <span>₹{taxCharge.toFixed(2)}</span>
               </div>
               <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
                 <span className="flex items-center gap-2">
                   <CurrencyRupeeIcon fontSize="small" /> Total
                 </span>
-                <span>₹{total.toFixed(2)}</span>
+                <span>₹{calculateTotal.toFixed(2)}</span>
               </div>
             </div>
 
