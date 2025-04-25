@@ -23,7 +23,7 @@ function Idoldetails() {
   const { pid } = useParams();
   const { idolList } = useContext(IdolContext);
   const [idol, setIdol] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingSkeleton, setLoadingSkeleton] = useState(true);
   const [error, setError] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -46,6 +46,7 @@ function Idoldetails() {
         setError(true);
       } finally {
         setLoadingSkeleton(false);
+        setLoading(false);
       }
     };
 

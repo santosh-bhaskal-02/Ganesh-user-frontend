@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import AlertBox from "../404ErrorPage/AlertBox";
 import SignInErrorPage from "../404ErrorPage/SignInErrorPage";
+import { useEffect } from "react";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -21,6 +22,8 @@ function CustomForm() {
   const navigate = useNavigate();
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState(null);
+
   const [suggestions, setSuggestions] = useState({
     suggestion: "",
     height: "",
@@ -34,6 +37,27 @@ function CustomForm() {
   if (!userId || !authToken) {
     return <SignInErrorPage />;
   }
+
+  useEffect(() => {
+    const fetchFormDetails = async () => {
+      try {
+        const response = await axios.get(
+          `${apiUrl}/api/custom-idol/fetch/user/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }
+        );
+        console.log(response.data);
+        setForm(response.data.result);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFormDetails();
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,6 +155,46 @@ function CustomForm() {
       )}
 
       {loading && <LoadingSpinner />}
+      {form && (
+        <div className="mt-10 p-6 border-t border-gray-300">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            Your Custom Idol Suggestion
+          </h3>
+          <div className="space-y-2">
+            <p>
+              <span className="font-semibold">Suggestion:</span> {form.suggestion}
+            </p>
+            <p>
+              <span className="font-semibold">Height:</span> {form.size}
+            </p>
+            <p>
+              <span className="font-semibold">Specifications:</span>{" "}
+              {form.otherSpecifications}
+            </p>
+            <p>
+              <span className="font-semibold">Status:</span>{" "}
+              <span
+                className={`px-2 py-1 rounded text-white ${
+                  form.status === "Pending"
+                    ? "bg-yellow-500"
+                    : form.status === "Accepted"
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}>
+                {form.status}
+              </span>
+            </p>
+            {form.image && (
+              <img
+                src={`${apiUrl}/${form.image}`}
+                alt="Custom Idol"
+                className="w-64 h-64 object-cover rounded mt-4"
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 space-y-6">
         <h2 className="text-3xl font-bold text-yellow-600 flex items-center gap-2">
           <FilePlus2 className="w-7 h-7 text-yellow-500" />
