@@ -194,6 +194,7 @@ const PlaceOrder = () => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}>
+      {orderLoading && <LoadingSpinner />}
       {alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-[1000]">
           <AlertBox
@@ -204,7 +205,7 @@ const PlaceOrder = () => {
           />
         </div>
       )}
-      {orderLoading && <LoadingSpinner />}
+
       {/* Step Progress Bar */}
       <div className="flex justify-center gap-4 mb-8">
         {["Cart", "Shipping", "Payment"].map((step, index) => (

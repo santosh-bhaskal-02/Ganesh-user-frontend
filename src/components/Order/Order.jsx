@@ -42,6 +42,7 @@ function Order() {
           }
         );
 
+        console.log(response.data);
         if (response.status === 200) {
           setOrderDetails(response.data);
         }
@@ -83,7 +84,10 @@ function Order() {
                     className="flex flex-col md:flex-row w-full gap-4 items-start md:items-center">
                     {/* Product Image */}
                     <img
-                      src={order.orderItems[0].product.thumbnail.image_url}
+                      src={
+                        order.orderItems[0].product?.thumbnail?.image_url ??
+                        order.orderItems[0].customProduct?.thumbnail?.image_url
+                      }
                       alt="Product"
                       className="w-full md:w-36 h-36 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
                     />
@@ -91,7 +95,7 @@ function Order() {
                     {/* Product Details */}
                     <div className="flex flex-col gap-2 flex-grow">
                       <h3 className="text-lg md:text-xl font-semibold text-gray-800">
-                        {order.orderItems[0].product.title}
+                        {order.orderItems[0].product?.title ?? "Custom Idol"}
                       </h3>
 
                       <p className="text-sm text-gray-600 flex items-center gap-2">
@@ -119,7 +123,7 @@ function Order() {
                     <div className="flex flex-col items-end justify-between ml-auto gap-2">
                       <p className="text-lg font-semibold text-green-600 flex items-center gap-1">
                         <CurrencyRupeeIcon fontSize="small" />
-                        {order.orderItems[0].product.price}
+                        {order.orderItems[0]?.product?.price ?? order.totalPrice}
                       </p>
                       <p className="text-xs text-gray-400">
                         Order ID: {order._id.toUpperCase()}

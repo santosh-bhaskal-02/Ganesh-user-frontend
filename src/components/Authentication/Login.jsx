@@ -68,7 +68,8 @@ function Login() {
         loginData
       );
 
-      if (response.status === 200) {
+      //console.log(response.data);
+      if (response) {
         setAlert({
           type: "success",
           title: "Successful!",
@@ -95,8 +96,9 @@ function Login() {
       setAlert({
         type: "error",
         title: "Oops!",
-        message: err.response?.data?.message || "Something went wrong. Try again!",
+        message: err.response.data.message || "Something went wrong. Try again!",
       });
+      //console.log("err", err.response.data.message);
     } finally {
       setLoading(false);
       setLoadingButton(false);
@@ -109,9 +111,9 @@ function Login() {
       {Alert && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-40 z-50">
           <AlertBox
-            type={alert.type}
-            title={alert.title}
-            message={alert.message}
+            type={Alert.type}
+            title={Alert.title}
+            message={Alert.message}
             onClick={() => setAlert(null)}
           />
         </div>

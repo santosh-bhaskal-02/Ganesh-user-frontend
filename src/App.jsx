@@ -34,8 +34,10 @@ import ShippingPolicy from "./components/Policy/ShippingPolicy.jsx";
 import PaymentsPolicy from "./components/Policy/PaymentPolicy.jsx";
 import PrivacyPolicy from "./components/Policy/PrivacyPolicy.jsx";
 import OrderDetails from "./components/Order/OrderDetails.jsx";
+import CustomFormDetails from "./components/CustomForm/CustomFormDetails.jsx";
 
 import ErrorPage from "./components/404ErrorPage/ErrorPage.jsx";
+import CustomIdolPlaceOrder from "./components/CustomForm/CustomIdolPlaceOrder.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -83,6 +85,8 @@ function AppContent() {
 
           <Route path="*" element={<ErrorPage />} />
           <Route path="/custom_form" element={<CustomForm />} />
+          <Route path="/custom_form/:formId" element={<CustomFormDetails />} />
+          <Route path="/custom_form/summary/:formId" element={<CustomIdolPlaceOrder />} />
         </Routes>
       </div>
       <Footer />

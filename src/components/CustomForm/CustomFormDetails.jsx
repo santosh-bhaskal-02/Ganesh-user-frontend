@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import LoadingSpinner from "../Error/LoadingSpinner";
+import LoadingSpinner from "../404ErrorPage/ErrorPage";
+
 import {
   UserIcon,
   MailIcon,
@@ -16,8 +17,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import DialogBox from "../Error/DialogBox";
-import AlertBox from "../Error/AlertBox";
+import DialogBox from "../404ErrorPage/Dialog";
+import AlertBox from "../404ErrorPage/AlertBox";
 
 const apiUrl = import.meta.env.VITE_BACK_END_URL;
 
@@ -31,43 +32,77 @@ const steps = [
   "Cancelled",
 ];
 
+const statusIcons = {
+  Accepted: CheckCircle,
+  "Awaiting for Payment": ClipboardListIcon,
+  "Payment Successful": MailIcon,
+  Shipped: RulerIcon,
+  "Out for Delivery": CalendarIcon,
+  Delivered: CheckCircle,
+  Cancelled: XCircle,
+};
+
 const StatusProgressBar = ({ currentStatus }) => {
   const currentIndex = steps.indexOf(currentStatus);
 
   return (
-    <div className="flex items-center justify-between gap-2 mt-8 overflow-x-auto">
-      {steps.map((step, index) => (
-        <div key={step} className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-3 mt-8 overflow-x-auto px-2">
+      {steps.map((step, index) => {
+        const isCompleted = index < currentIndex;
+        const isCurrent = index === currentIndex;
+        const Icon = statusIcons[step] || InfoIcon;
+
+        return (
           <div
-            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              index <= currentIndex
-                ? "bg-blue-600 text-white"
-                : "bg-gray-300 text-gray-600"
-            }`}>
-            {index + 1}
-          </div>
-          <span className="text-xs">{step}</span>
-          {index < steps.length - 1 && (
+            key={step}
+            className="flex flex-col items-center text-center min-w-[80px] relative">
             <div
-              className={`w-8 h-1 ${
-                index < currentIndex ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            />
-          )}
-        </div>
-      ))}
+              className={`w-10 h-10 rounded-full flex items-center justify-center border-2 shadow transition-all duration-300
+                ${
+                  isCompleted
+                    ? "bg-green-500 border-green-600 text-white"
+                    : isCurrent
+                    ? "bg-blue-500 border-blue-600 text-white"
+                    : "bg-gray-200 border-gray-300 text-gray-500"
+                }
+              `}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <span
+              className={`text-xs mt-2 font-semibold ${
+                isCurrent
+                  ? "text-blue-700"
+                  : isCompleted
+                  ? "text-green-700"
+                  : "text-gray-600"
+              }`}>
+              {step}
+            </span>
+
+            {index < steps.length - 1 && (
+              <div
+                className={`absolute top-5 left-full w-8 h-1 ${
+                  index < currentIndex ? "bg-green-500" : "bg-gray-300"
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
 
 function CustomFormDetails() {
-  const { formId } = useParams();
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const authToken = Cookies.get("authToken");
   const [Alert, setAlert] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
   const [statusDropdown, setStatusDropdown] = useState("");
+
+  const { formId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFormDetails = async () => {
@@ -247,31 +282,21 @@ function CustomFormDetails() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="flex justify-center gap-6 mt-8 flex-wrap">
-          {form.status === "Accepted" ? (
-            <select
-              value={statusDropdown}
-              onChange={(e) => {
-                setStatusDropdown(e.target.value);
-                handleSubmit(e.target.value);
-              }}
-              className="px-4 py-2 rounded-lg border border-blue-400 text-blue-700 shadow-md">
-              <option value="">Update Status</option>
-              {steps.slice(1).map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <>
-              <button
-                onClick={() => setShowDialog(true)}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition duration-200">
-                <XCircle className="w-5 h-5" />
-                Cancel
-              </button>
-            </>
+          {form.status === "Awaiting for Payment" && (
+            <button
+              onClick={() => navigate(`/custom_form/summary/${formId}`)}
+              className="bg-yellow-500 hover:bg-yellow-400 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Pay Now
+            </button>
           )}
+
+          <button
+            onClick={() => setShowDialog(true)}
+            className="bg-red-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2">
+            <XCircle className="w-5 h-5" />
+            Cancel
+          </button>
         </motion.div>
       )}
     </motion.div>
