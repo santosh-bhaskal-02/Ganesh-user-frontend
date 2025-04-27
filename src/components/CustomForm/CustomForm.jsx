@@ -160,67 +160,6 @@ function CustomForm() {
       {loading && <LoadingSpinner />}
 
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {form && (
-          <div className="p-6 bg-gradient-to-br from-blue-100 via-white to-blue-50 rounded-2xl shadow-lg border border-blue-200 space-y-6">
-            <h3 className="text-3xl font-bold text-blue-700 border-b pb-3">
-              Your Custom Idol Suggestion
-            </h3>
-
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              {/* Image Block */}
-              {form.thumbnail.image_url ? (
-                <img
-                  src={form.thumbnail.image_url}
-                  alt="Custom Idol"
-                  className="w-36 h-36 object-cover rounded-xl border-2 border-blue-200 shadow"
-                />
-              ) : (
-                <div className="w-36 h-36 flex items-center justify-center bg-gray-100 text-gray-400 border-2 border-blue-200 rounded-xl">
-                  No Image
-                </div>
-              )}
-
-              {/* Details + Button */}
-              <div className="flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-2 text-gray-800">
-                  <p className="font-semibold text-lg">
-                    <span className="text-yellow-600">Suggestion:</span> {form.suggestion}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium text-gray-600">Height:</span> {form.size}
-                  </p>
-
-                  <p className="text-sm">
-                    <span className="font-medium text-gray-600">Status:</span>{" "}
-                    <span
-                      className={`inline-block px-3 py-1 text-sm font-semibold rounded-full text-white shadow-sm ${
-                        form.status === "Pending"
-                          ? "bg-yellow-500"
-                          : form.status === "Accepted"
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}>
-                      {form.status}
-                    </span>
-                  </p>
-                </div>
-
-                {/* Button at the bottom of the block */}
-                <div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/custom_form/${form.id}`)}
-                    className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow transition-all">
-                    <Eye className="w-5 h-5" />
-                    View Full Details
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-yellow-100">
           <h2 className="text-3xl font-bold text-yellow-600 flex items-center gap-2 border-b pb-2">
             <FilePlus2 className="w-7 h-7 text-yellow-500" />
@@ -324,6 +263,67 @@ function CustomForm() {
             </div>
           </form>
         </div>
+
+        {form && (
+          <div className="p-6 bg-gradient-to-br from-blue-100 via-white to-blue-50 rounded-2xl shadow-lg border border-blue-200 space-y-6">
+            <h3 className="text-3xl font-bold text-blue-700 border-b pb-3">
+              Your Custom Idol Suggestion
+            </h3>
+
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              {/* Image Block */}
+              {form.thumbnail.image_url ? (
+                <img
+                  src={form.thumbnail.image_url}
+                  alt="Custom Idol"
+                  className="w-36 h-36 object-cover rounded-xl border-2 border-blue-200 shadow"
+                />
+              ) : (
+                <div className="w-36 h-36 flex items-center justify-center bg-gray-100 text-gray-400 border-2 border-blue-200 rounded-xl">
+                  No Image
+                </div>
+              )}
+
+              {/* Details + Button */}
+              <div className="flex-1 flex flex-col justify-between space-y-3">
+                <div className="space-y-2 text-gray-800">
+                  <p className="font-semibold text-lg">
+                    <span className="text-yellow-600">Suggestion:</span> {form.suggestion}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium text-gray-600">Height:</span> {form.size}
+                  </p>
+
+                  <p className="text-sm">
+                    <span className="font-medium text-gray-600">Status:</span>{" "}
+                    <span
+                      className={`inline-block px-3 py-1 text-sm font-semibold rounded-full text-white shadow-sm ${
+                        form.status === "Pending"
+                          ? "bg-yellow-500"
+                          : form.status === "Accepted"
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                      }`}>
+                      {form.status}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Button at the bottom of the block */}
+                <div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate(`/custom_form/${form.id}`)}
+                    className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow transition-all">
+                    <Eye className="w-5 h-5" />
+                    View Full Details
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
