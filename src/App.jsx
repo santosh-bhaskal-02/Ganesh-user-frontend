@@ -1,10 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-
+import "./index.css";
 import { IdolProvider } from "./components/ContextApi/IdolContext.jsx";
 import { AuthProvider } from "./components/ContextApi/AuthContext.jsx";
 
-//import Heading from "./components/Navbar/heading.jsx";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Home from "./components/Home/LandingPage.jsx";
 import Content from "./components/Container/IdolCardsList.jsx";
@@ -15,8 +14,6 @@ import Order from "./components/Order/Order.jsx";
 import Idoldetails from "./components/Productfeature/Idoldetails.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 
-import "./index.css";
-//import UserProfile from "./components/User/UserProfile.jsx";
 import AddAddress from "./components/Address/AddAddress.jsx";
 import CheckAddress from "./components/Address/CheckAddress.jsx";
 import PlaceOrder from "./components/Order/PlaceOrder.jsx";
