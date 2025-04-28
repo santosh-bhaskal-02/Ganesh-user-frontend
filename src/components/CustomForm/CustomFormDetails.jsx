@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import LoadingSpinner from "../404ErrorPage/ErrorPage";
+import LoadingSpinner from "../404ErrorPage/LoadingSpinner";
 
 import {
   UserIcon,

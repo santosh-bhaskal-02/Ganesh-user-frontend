@@ -237,6 +237,7 @@ function OrderDetails() {
           transition={{ duration: 0.4 }}>
           {order.orderItems.map((item) => (
             <div className="flex flex-col p-6 border-b md:flex-row gap-6">
+              {console.log(item)}
               <img
                 className="w-32 h-32 object-cover rounded-lg shadow-lg border-2 border-blue-300"
                 src={
@@ -251,7 +252,7 @@ function OrderDetails() {
                 </h3>
                 <p className="text-gray-600 flex items-center gap-1">
                   <CurrencyRupeeIcon fontSize="small" className="text-green-500" />
-                  {item?.product?.price.toFixed(2) ?? order.totalPrice.toFixed(2)}
+                  {item?.product?.price ?? order.totalPrice.toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-700">
                   {item?.product?.reachDisciption ?? item?.customProduct?.suggestion}

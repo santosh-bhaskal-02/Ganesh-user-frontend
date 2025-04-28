@@ -72,7 +72,7 @@ const Navbar = () => {
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => navigate("/explore")}>
-            <img className="h-22 w-32" src="Ganesh-logo.png" alt="Logo" />
+            <img className="h-22 w-32" src="new2.png" alt="Logo" />
           </div>
 
           {/* Right Icons - Mobile */}
