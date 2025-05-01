@@ -216,27 +216,30 @@ function Cart() {
       </div>
 
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="grid md:grid-cols-2 gap-8 p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6 md:p-8">
           {/* Cart Items */}
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Shopping Cart</h2>
             {cart.cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between border-b pb-4 mb-6 hover:bg-gray-50 transition duration-200 ease-in-out">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={item.product.thumbnail.image_url}
-                    alt={item.product.title}
-                    className="w-20 h-20 object-cover rounded-lg shadow-lg"
-                  />
-                  <div>
-                    <h3 className="text-lg font-semibold">{item.product.title}</h3>
-                    <p className="text-sm text-gray-500">Price: ₹{item.product.price}</p>
-                  </div>
-                </div>
+                <div
+                    key={item._id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 mb-6 hover:bg-gray-50 transition duration-200 ease-in-out gap-4">
 
-                <div className="flex items-center gap-6">
+                  <div className="flex gap-4 items-start sm:items-center">
+                    <img
+                        src={item.product.thumbnail.image_url}
+                        alt={item.product.title}
+                        className="w-20 h-20 object-cover rounded-lg shadow-lg"
+                    />
+                    <div>
+                      <h3 className="text-base font-semibold">{item.product.title}</h3>
+                      <p className="text-sm text-gray-500">Price: ₹{item.product.price}</p>
+                    </div>
+                  </div>
+
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 sm:gap-6 mt-2 sm:mt-0">
+
                   <div className="flex items-center border rounded-md">
                     <button
                       disabled={loadingQuantity || quantities[item._id] <= 1}
@@ -285,7 +288,7 @@ function Cart() {
                 </span>
                 <span>₹{parseFloat(taxCharge).toFixed(2)}</span>
               </div>
-              <div className="border-t pt-4 flex justify-between text-xl font-semibold text-gray-800">
+              <div className="border-t pt-4 flex justify-between items-center text-lg sm:text-xl font-semibold text-gray-800">
                 <span className="flex items-center gap-2">
                   <CurrencyRupeeIcon fontSize="small" /> Total
                 </span>
@@ -293,7 +296,7 @@ function Cart() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 w-full">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
