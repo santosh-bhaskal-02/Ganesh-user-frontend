@@ -29,7 +29,7 @@ function Home() {
   return (
     <div>
       <Swiper
-        modules={[Pagination, Autoplay]} // removed Navigation module
+        modules={[Pagination, Autoplay]}
         pagination={{ clickable: true }}
         autoplay={{ delay: 4000, disableOnInteraction: false }}
         loop={true}

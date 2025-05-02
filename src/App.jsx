@@ -1,13 +1,13 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import {BrowserRouter, Routes, Route, useLocation} from "react-router-dom";
 import "./index.css";
-import { IdolProvider } from "./components/ContextApi/IdolContext.jsx";
-import { AuthProvider } from "./components/ContextApi/AuthContext.jsx";
+import {IdolProvider} from "./components/ContextApi/IdolContext.jsx";
+import {AuthProvider} from "./components/ContextApi/AuthContext.jsx";
 
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Home from "./components/Home/LandingPage.jsx";
 import Content from "./components/Container/IdolCardsList.jsx";
-import Login from "./components/Authentication/Login.jsx";
+import Login from "./components/Authentication/Login.jsx"
 import Signup from "./components/Authentication/Signup.jsx";
 import Cart from "./components/Cart/Cart.jsx";
 import Order from "./components/Order/Order.jsx";
@@ -37,70 +37,70 @@ import ErrorPage from "./components/404ErrorPage/ErrorPage.jsx";
 import CustomIdolPlaceOrder from "./components/CustomForm/CustomIdolPlaceOrder.jsx";
 
 function AppContent() {
-  const location = useLocation();
-  const isLogin = location.pathname == "/login";
-  const isSignup = location.pathname == "/signup";
-  const isHome = location.pathname == "/";
-  const authPage = isLogin || isSignup || isHome;
+    const location = useLocation();
+    const isLogin = location.pathname == "/login";
+    const isSignup = location.pathname == "/signup";
+    const isHome = location.pathname == "/";
+    const authPage = isLogin || isSignup || isHome;
 
-  return (
-    <div className="min-h-screen bg-gray-200 flex flex-col">
-      <Navbar />
-      <div className="flex-grow">
-        <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/explore" element={<Content />} />
-          <Route path="/idoldetails/:pid" element={<Idoldetails />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot_password" element={<ForgotPassword />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/orders" element={<Order />} />
-          <Route path="/order-details/:orderId" element={<OrderDetails />} />
+    return (
+        <div className="min-h-screen bg-gray-200 flex flex-col">
+            <Navbar/>
+            <div className="flex-grow">
+                <Routes>
+                    <Route exact path="/" element={<Home/>}/>
+                    <Route path="/explore" element={<Content/>}/>
+                    <Route path="/idoldetails/:pid" element={<Idoldetails/>}/>
+                    <Route path="/login" element={<Login/>}/>
+                    <Route path="/signup" element={<Signup/>}/>
+                    <Route path="/forgot_password" element={<ForgotPassword/>}/>
+                    <Route path="/cart" element={<Cart/>}/>
+                    <Route path="/orders" element={<Order/>}/>
+                    <Route path="/order-details/:orderId" element={<OrderDetails/>}/>
 
-          <Route path="/profile/*" element={<User />}>
-            <Route path="" element={<PersonelInfo />} />
-            <Route path="info" element={<PersonelInfo />} />
-            <Route path="saved_addresses" element={<SavedAddress />} />
-          </Route>
+                    <Route path="/profile/*" element={<User/>}>
+                        <Route path="" element={<PersonelInfo/>}/>
+                        <Route path="info" element={<PersonelInfo/>}/>
+                        <Route path="saved_addresses" element={<SavedAddress/>}/>
+                    </Route>
 
-          <Route path="/address/:pid" element={<CheckAddress />} />
-          <Route path="/address" element={<CheckAddress />} />
-          <Route path="/add_address/:pid" element={<AddAddress />} />
-          <Route path="/add_address" element={<AddAddress />} />
-          <Route path="/profile/add_address" element={<AddAddress />} />
-          <Route path="/place_order/:pid" element={<PlaceOrder />} />
-          <Route path="/place_order_cart" element={<PlaceOrderCart />} />
+                    <Route path="/address/:pid" element={<CheckAddress/>}/>
+                    <Route path="/address" element={<CheckAddress/>}/>
+                    <Route path="/add_address/:pid" element={<AddAddress/>}/>
+                    <Route path="/add_address" element={<AddAddress/>}/>
+                    <Route path="/profile/add_address" element={<AddAddress/>}/>
+                    <Route path="/place_order/:pid" element={<PlaceOrder/>}/>
+                    <Route path="/place_order_cart" element={<PlaceOrderCart/>}/>
 
-          <Route path="/about_us" element={<AboutUs />} />
-          <Route path="/contact_us" element={<ContactUs />} />
-          <Route path="/terms-and-conditions" element={<TermsConditions />} />
-          <Route path="/cancellation-refund-policy" element={<RefundPolicy />} />
-          <Route path="/shipping-policy" element={<ShippingPolicy />} />
-          <Route path="/payments-policy" element={<PaymentsPolicy />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/about_us" element={<AboutUs/>}/>
+                    <Route path="/contact_us" element={<ContactUs/>}/>
+                    <Route path="/terms-and-conditions" element={<TermsConditions/>}/>
+                    <Route path="/cancellation-refund-policy" element={<RefundPolicy/>}/>
+                    <Route path="/shipping-policy" element={<ShippingPolicy/>}/>
+                    <Route path="/payments-policy" element={<PaymentsPolicy/>}/>
+                    <Route path="/privacy-policy" element={<PrivacyPolicy/>}/>
 
-          <Route path="*" element={<ErrorPage />} />
-          <Route path="/custom_form" element={<CustomForm />} />
-          <Route path="/custom_form/:formId" element={<CustomFormDetails />} />
-          <Route path="/custom_form/summary/:formId" element={<CustomIdolPlaceOrder />} />
-        </Routes>
-      </div>
-      <Footer />
-    </div>
-  );
+                    <Route path="*" element={<ErrorPage/>}/>
+                    <Route path="/custom_form" element={<CustomForm/>}/>
+                    <Route path="/custom_form/:formId" element={<CustomFormDetails/>}/>
+                    <Route path="/custom_form/summary/:formId" element={<CustomIdolPlaceOrder/>}/>
+                </Routes>
+            </div>
+            <Footer/>
+        </div>
+    );
 }
 
 function App() {
-  return (
-    <BrowserRouter>
-      <IdolProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </IdolProvider>
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <IdolProvider>
+                <AuthProvider>
+                    <AppContent/>
+                </AuthProvider>
+            </IdolProvider>
+        </BrowserRouter>
+    );
 }
 
 export default App;

@@ -11,9 +11,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@heroicons/react": "^1.0.6",
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.15.21",
+    "@mui/styled-engine": "^7.0.2",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
     "axios": "^1.7.9",

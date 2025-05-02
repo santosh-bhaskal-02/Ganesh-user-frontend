@@ -163,6 +163,12 @@ const Navbar = () => {
                     <NavLink to="/" icon={HomeIcon} label="Home"/>
                     <NavLink to="/about_us" icon={InfoIcon} label="About Us"/>
                     <NavLink to="/contact_us" icon={PhoneIcon} label="Contact Us"/>
+                    <a
+                        href="/custom_form"
+                        className="flex items-center gap-2 px-4 py-2 text-white hover:text-blue-400 transition duration-200 ease-in-out">
+                        <DiamondIcon className="w-5 h-5"/>
+                        Customized Idol
+                    </a>
                     {!signIn && (
                         <Link
                             to="/login"
@@ -171,12 +177,7 @@ const Navbar = () => {
                             Login
                         </Link>
                     )}
-                    <a
-                        href="/custom_form"
-                        className="flex items-center gap-2 px-4 py-2 text-white hover:text-blue-400 transition duration-200 ease-in-out">
-                        <DiamondIcon className="w-5 h-5"/>
-                        Customized Idol
-                    </a>
+
                 </div>
             )}
         </nav>
